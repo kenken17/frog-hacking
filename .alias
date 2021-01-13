@@ -16,6 +16,8 @@ LIGHTPURPLE='\033[1;35m'
 LIGHTCYAN='\033[1;36m'
 WHITE='\033[1;37m'
 
+EXTS=asp,aspx,bat,cgi,htm,html,js,log,php,phtml,sh,sql,txt,xml
+
 highlight() { perl -pe "s/$1/${RED}$&${NOCOLOR}/g"; }
 
 go_http () {
@@ -23,10 +25,10 @@ go_http () {
     if [ -z $TARGET ]; then     
       echo "Missing Target IP"
     else
-      gobuster dir -e -w $W_COMMON -x php,html,js,css,cgi,txt,sh,py,rb -u http://$TARGET "$@" | highlight "200|30[12]"
+      gobuster dir -e -w $W_COMMON -x $EXTS -u http://$TARGET "$@" | highlight "200|30[12]"
     fi
   else
-    gobuster dir -e -w $W_COMMON -x php,html,js,css,cgi,txt,sh,py,rb -u http://$1 "$@" | highlight "200|30[12]"
+    gobuster dir -e -w $W_COMMON -x $EXTS -u http://$1 "$@" | highlight "200|30[12]"
   fi
 }
 
@@ -35,10 +37,10 @@ go_https () {
     if [ -z $TARGET ]; then     
       echo "Missing Target IP"
     else
-      gobuster dir -e -w $W_COMMON -x php,html,js,css,cgi,txt,sh,py,rb -u https://$TARGET "$@" | highlight "200|30[12]"
+      gobuster dir -e -w $W_COMMON -x $EXTS -u https://$TARGET "$@" | highlight "200|30[12]"
     fi
   else
-    gobuster dir -e -w $W_COMMON -x php,html,js,css,cgi,txt,sh,py,rb -u https://$1 "$@" | highlight "200|30[12]"
+    gobuster dir -e -w $W_COMMON -x $EXTS -u https://$1 "$@" | highlight "200|30[12]"
   fi
 }
 
@@ -60,16 +62,36 @@ map_version () {
       echo "Missing Target IP"
     else
       if [ -z $PORTS ]; then
-        nmap -sV $TARGET "$@" | highlight "^2[12]\/tcp|^80\/tcp"
+        nmap -sV -p- $TARGET "$@" | highlight "^2[12]\/tcp|^80\/tcp"
       else
         nmap -sV -p $PORTS $TARGET "$@" | highlight "^2[12]\/tcp|^80\/tcp"
       fi
     fi
   else
     if [ -z $PORTS ]; then
-      nmap -sV $1 "$@" | highlight "^2[12]\/tcp|^80\/tcp"
+      nmap -sV -p- $1 "$@" | highlight "^2[12]\/tcp|^80\/tcp"
     else
       nmap -sV -p $PORTS $1 "$@" | highlight "^2[12]\/tcp|^80\/tcp"
+    fi
+  fi
+}
+
+map_script () {
+  if [ -z $1 ]; then
+    if [ -z $TARGET ]; then     
+      echo "Missing Target IP"
+    else
+      if [ -z $PORTS ]; then
+        nmap -sC -p- $TARGET "$@" | highlight "^2[12]\/tcp|^80\/tcp"
+      else
+        nmap -sC -p $PORTS $TARGET "$@" | highlight "^2[12]\/tcp|^80\/tcp"
+      fi
+    fi
+  else
+    if [ -z $PORTS ]; then
+      nmap -sC -p- $1 "$@" | highlight "^2[12]\/tcp|^80\/tcp"
+    else
+      nmap -sC -p $PORTS $1 "$@" | highlight "^2[12]\/tcp|^80\/tcp"
     fi
   fi
 }
