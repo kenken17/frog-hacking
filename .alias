@@ -16,20 +16,68 @@ LIGHTPURPLE='\033[1;35m'
 LIGHTCYAN='\033[1;36m'
 WHITE='\033[1;37m'
 
-EXTS=asp,aspx,bat,cgi,htm,html,js,log,php,phtml,sh,sql,txt,xml
+EXTS=.asp,.aspx,.bat,.cgi,.htm,.html,.js,.jsa,.log,.php,.phtml,.sh,.sql,.txt,.xml
 
 highlight() { perl -pe "s/$1/${RED}$&${NOCOLOR}/g"; }
 
-go_http () {
+f_dir () {
+  if [ -z $TARGET ]; then
+    echo 'No TARGET'
+  else
+    if [ -z $1 ]; then
+      ffuf -c -recursion -recursion-depth 3 -t 64 -w $W_COMMON -u http://$TARGET/FUZZ
+    else
+      ffuf -c -recursion -recursion-depth 3 -t 64 -w $W_COMMON -u http://$TARGET/$1/FUZZ
+    fi
+  fi
+}
+
+f_ext () {
+  if [ -z $TARGET ]; then
+    echo 'No TARGET'
+  else
+    if [ -z $1 ]; then
+      ffuf -c -recursion -recursion-depth 3 -t 64 -w $W_COMMON -e $EXTS -u http://$TARGET/FUZZ
+    else
+      ffuf -c -recursion -recursion-depth 3 -t 64 -w $W_COMMON -e $1 -u http://$TARGET/FUZZ
+    fi
+  fi
+}
+
+f_dir_ext () {
+  if [ -z $TARGET ]; then
+    echo 'No TARGET'
+  else
+    if [ -z $1 ]; then
+      ffuf -c -recursion -recursion-depth 3 -t 64 -w $W_COMMON -e $EXTS -u http://$TARGET/FUZZ
+    else
+      ffuf -c -recursion -recursion-depth 3 -t 64 -w $W_COMMON -e $EXTS -u http://$TARGET/$1/FUZZ
+    fi
+  fi
+}
+
+go_http_medium () {
   if [ -z $1 ]; then
     if [ -z $TARGET ]; then     
       echo "Missing Target IP"
     else
-      gobuster dir -e -w $W_COMMON -x $EXTS -u http://$TARGET "$@" | highlight "200|30[12]"
+      gobuster dir -e -l -t 64 -w $W_BIG -x $EXTS -u http://$TARGET "$@" | highlight "200|30[12]"
     fi
   else
-    gobuster dir -e -w $W_COMMON -x $EXTS -u http://$1 "$@" | highlight "200|30[12]"
+    gobuster dir -e -l -t 64 -w $W_BIG -x $EXTS -u http://$1 "$@" | highlight "200|30[12]"
   fi
+}
+
+go_http_big () {
+  if [ -z $1 ]; then
+    if [ -z $TARGET ]; then     
+      echo "Missing Target IP"
+    else
+      gobuster dir -e -l -t 64 -w $W_DIR_2_3_MEDIUM -x $EXTS -u http://$TARGET "$@" | highlight "200|30[12]"
+        fi
+  else
+    gobuster dir -e -l -t 64 -w $W_DIR_2_3_MEDIUM -x $EXTS -u http://$1 "$@" | highlight "200|30[12]"
+      fi
 }
 
 go_https () {
@@ -37,10 +85,10 @@ go_https () {
     if [ -z $TARGET ]; then     
       echo "Missing Target IP"
     else
-      gobuster dir -e -w $W_COMMON -x $EXTS -u https://$TARGET "$@" | highlight "200|30[12]"
+      gobuster dir -e -t 16 -w $W_COMMON -x $EXTS -u https://$TARGET "$@" | highlight "200|30[12]"
     fi
   else
-    gobuster dir -e -w $W_COMMON -x $EXTS -u https://$1 "$@" | highlight "200|30[12]"
+    gobuster dir -e -t 64 -w $W_COMMON -x $EXTS -u https://$1 "$@" | highlight "200|30[12]"
   fi
 }
 
@@ -94,4 +142,8 @@ map_script () {
       nmap -sC -p $PORTS $1 "$@" | highlight "^2[12]\/tcp|^80\/tcp"
     fi
   fi
+}
+
+cp_peas () {
+  scp ~/Tools/linpeas.sh $1@$TARGET:/tmp
 }
