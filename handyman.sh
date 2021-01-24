@@ -10,6 +10,8 @@ COMMAND_7='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
 COMMAND_8='binwalk -e file.jpg'
 COMMAND_8='steghide extract -sf file.jpg'
 COMMAND_a='7z x file.zip'
+COMMAND_b='john --wordlist=$W_PASSWORD --format=FORMAT hash.txt'
+COMMAND_c='python /usr/share/john/ssh2john.py key > key.hash'
 
 show_menus() {
   clear
@@ -26,6 +28,8 @@ show_menus() {
   echo "  8) $COMMAND_8"
   echo "  9) $COMMAND_9"
   echo "  a) $COMMAND_a"
+  echo "  b) $COMMAND_b"
+  echo "  c) $COMMAND_c"
   echo ""
   echo "  x. Exit"
   echo ""
@@ -83,6 +87,12 @@ read_options() {
     a) runV $COMMAND_a;;
     a-) runV $COMMAND_a;;
     a_) runH $COMMAND_a;;
+    b) runV $COMMAND_b;;
+    b-) runV $COMMAND_b;;
+    b_) runH $COMMAND_b;;
+    c) runV $COMMAND_c;;
+    c-) runV $COMMAND_c;;
+    c_) runH $COMMAND_c;;
     x) exit 0;;
     *) echo -e "Error..."
   esac
