@@ -25,7 +25,7 @@ COMMAND_2='Serve tools'
 COMMAND_3='Upload handyman'
 COMMAND_4='sudo vim /etc/hosts'
 
-COMMAND_e1='rustscan -a $RHSOT -- -sV -sC | highlight "^\d+\/tcp"'
+COMMAND_e1='rustscan -a $RHOST -- -sV -sC | highlight "^\d+\/tcp"'
 COMMAND_e2='nmap -sV -sC $RHOST | highlight "^\d+\/tcp"'
 COMMAND_e3='ffuf -v -c -recursion -t 64 -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
 COMMAND_e4='gobuster dir -e -l -t 64 -w "$W_COMMON" -x $EXTS -u http://$RHOST | highlight "200|30[12]"'
