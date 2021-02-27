@@ -19,17 +19,17 @@ LIGHTCYAN='\033[1;36m'
 WHITE='\033[1;37m'
 
 LHOST=10.9.233.39
-RHOST=$RHOST
 EXTS=.asp,.aspx,.bat,.cgi,.htm,.html,.js,.log,.php,.phtml,.sh,.sql,.txt,.xml
 
 COMMAND_2='Serve tools'
 COMMAND_3='Upload handyman'
 COMMAND_4='sudo vim /etc/hosts'
 
-COMMAND_e1='nmap -sV -sC $RHOST | highlight "^\d+\/tcp"'
-COMMAND_e2='ffuf -v -c -recursion -t 64 -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
-COMMAND_e3='gobuster dir -e -l -t 64 -w "$W_COMMON" -x $EXTS -u http://$RHOST | highlight "200|30[12]"'
-COMMAND_e4='whatweb -v $RHOST'
+COMMAND_e1='rustscan -a $RHSOT -- -sV -sC | highlight "^\d+\/tcp"'
+COMMAND_e2='nmap -sV -sC $RHOST | highlight "^\d+\/tcp"'
+COMMAND_e3='ffuf -v -c -recursion -t 64 -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
+COMMAND_e4='gobuster dir -e -l -t 64 -w "$W_COMMON" -x $EXTS -u http://$RHOST | highlight "200|30[12]"'
+COMMAND_e5='whatweb -v $RHOST'
 
 COMMAND_5='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST ssh -s PORT'
 COMMAND_6='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
@@ -72,6 +72,7 @@ show_menus() {
   echo -e "  ${YELLOW}e2${NOCOLOR}) $COMMAND_e2"
   echo -e "  ${YELLOW}e3${NOCOLOR}) $COMMAND_e3"
   echo -e "  ${YELLOW}e4${NOCOLOR}) $COMMAND_e4"
+  echo -e "  ${YELLOW}e5${NOCOLOR}) $COMMAND_e5"
   echo -e ""
   echo -e "  ${YELLOW}5${NOCOLOR}) $COMMAND_5"
   echo -e "  ${YELLOW}6${NOCOLOR}) $COMMAND_6"
@@ -113,21 +114,23 @@ show_menus() {
 }
 
 exportRHOST() {
-  RHOST=$(xclip -o)
+  CLIPBOARD=$(xclip -o)
 
-  if [[ $RHOST =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    export RHOST=$RHOST
+  if [[ $CLIPBOARD =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    if [ -z $RHOST]; then
+      export RHOST=$CLIPBOARD
 
-    tmux split-window -v
-    sleep 0.1
-
-    tmux send-keys "export RHOST=$RHOST" 'C-m'
-    tmux kill-pane -t 0
+      tmux send-keys "x" ENTER
+      tmux send-keys "export RHOST=$CLIPBOARD" ENTER
+      tmux send-keys "$0" ENTER
+    fi
   else
-    tmux split-window -v
-    sleep 0.1
+    if [ $1 = 1 ]; then
+      tmux split-window -v
+      sleep 0.1
 
-    tmux send-keys "export RHOST="
+      tmux send-keys "export RHOST="
+    fi
   fi
 }
 
@@ -146,15 +149,15 @@ runServeTools() {
   sleep 0.1
 
   # Setup handyman with correct LHOST
-  tmux send-keys "cp ~/Tools/handyman.sh ~/Tools/handyman_cp" 'C-m'
-  tmux send-keys 'sed -i "s/L_H_O_S_T/$LHOST/g" ~/Tools/handyman_cp' 'C-m'
+  tmux send-keys "cp ~/Tools/handyman.sh ~/Tools/handyman_cp" ENTER
+  tmux send-keys 'sed -i "s/L_H_O_S_T/$LHOST/g" ~/Tools/handyman_cp' ENTER
   tmux send-keys 'cd ~/Tools' 'C-m'
   
   # Serve the Tools/ folder
   if [ ! command -v python3 &> /dev/null ]; then
-    tmux send-keys "python -m SimpleHTTPServer" 'C-m'
+    tmux send-keys "python -m SimpleHTTPServer" ENTER
   else
-    tmux send-keys "python3 -m http.server" 'C-m'
+    tmux send-keys "python3 -m http.server" ENTER
   fi
 }
 
@@ -166,10 +169,10 @@ runUploadHandyman() {
   tmux split-window -v
   sleep 0.1
 
-  tmux send-keys "cp ~/Tools/handyman.sh ~/Tools/handyman_cp" 'C-m'
+  tmux send-keys "cp ~/Tools/handyman.sh ~/Tools/handyman_cp" ENTER
   sleep 0.1
 
-  tmux send-keys 'sed -i "s/L_H_O_S_T/$LHOST/g" ~/Tools/handyman_cp' 'C-m'
+  tmux send-keys 'sed -i "s/L_H_O_S_T/$LHOST/g" ~/Tools/handyman_cp' ENTER
   sleep 0.1
 
   tmux send-keys "scp ~/Tools/handyman_cp $USER@$RHOST:/tmp/handyman"
@@ -200,8 +203,8 @@ read_options() {
   local choice
   read -p "Enter choice: " choice
   case $choice in
-    1) exportRHOST;;
-    R) exportRHOST;;
+    1) exportRHOST 1;;
+    R) exportRHOST 1;;
 
     2) runServeTools;;
 
@@ -213,6 +216,7 @@ read_options() {
     e2) runV $COMMAND_e2;;
     e3) runV $COMMAND_e3;;
     e4) runV $COMMAND_e4;;
+    e5) runV $COMMAND_e5;;
 
     5) runV $COMMAND_5;;
     6) runV $COMMAND_6;;
@@ -256,5 +260,7 @@ do_menu() {
 if [ ! -z "$1" ]; then
   exportLHOST $1
 fi
+
+exportRHOST 0
 
 do_menu

