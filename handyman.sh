@@ -23,7 +23,8 @@ EXTS=.asp,.aspx,.bat,.cgi,.htm,.html,.js,.log,.php,.phtml,.sh,.sql,.txt,.xml
 
 COMMAND_2='Serve tools'
 COMMAND_3='Upload handyman'
-COMMAND_4='sudo vim /etc/hosts'
+COMMAND_4="Remove entry from /etc/hosts"
+COMMAND_5="sudo bash -c \"echo 'HOSTNAME $RHOST' >> /etc/hosts\""
 
 COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -sV -sC | tee -i scan.txt | highlight "^\d+\/tcp"'
 COMMAND_e2='nmap -sV -sC $RHOST | highlight "^\d+\/tcp"'
@@ -72,6 +73,7 @@ show_menus() {
   echo -e "  ${YELLOW}2${NOCOLOR}) $COMMAND_2"
   echo -e "  ${YELLOW}3${NOCOLOR}) $COMMAND_3"
   echo -e "  ${YELLOW}4${NOCOLOR}) $COMMAND_4"
+  echo -e "  ${YELLOW}5${NOCOLOR}) $COMMAND_5"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Enumeration${NOCOLOR}"
   echo -e "  -------------"
@@ -212,7 +214,14 @@ runC() {
   echo "COPIED!"
 }
 
+removeEtcHosts() {
+  # Remove the entry from /etc/hosts
+  sudo bash -c "sed -i '/$RHOST/d' /etc/hosts"
+}
+
 runExit() {
+  removeEtcHosts
+
   exit 0
 }
 
@@ -225,7 +234,8 @@ read_options() {
 
     2) runServeTools;;
     3) runUploadHandyman;;
-    4) runV $COMMAND_4;;
+    4) removeEtcHosts;;
+    5) runV $COMMAND_5;;
 
     e1) runV $COMMAND_e1;;
     e2) runV $COMMAND_e2;;
