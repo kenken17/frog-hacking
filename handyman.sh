@@ -28,7 +28,7 @@ COMMAND_5="sudo bash -c \"echo 'HOSTNAME $RHOST' >> /etc/hosts\""
 
 COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -sV -sC | tee -i scan.txt | highlight "^\d+\/tcp"'
 COMMAND_e2='nmap -sV -sC $RHOST | highlight "^\d+\/tcp"'
-COMMAND_e3='ffuf -v -c -recursion -t 64 -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
+COMMAND_e3='ffuf -v -c -recursion -t 64 -o ffuf.txt -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
 COMMAND_e4='gobuster dir -e -l -t 64 -w "$W_COMMON" -x $EXTS -u http://$RHOST | highlight "200|30[12]"'
 COMMAND_e5='whatweb -v $RHOST'
 
@@ -132,13 +132,11 @@ exportRHOST() {
   CLIPBOARD=$(xclip -o)
 
   if [[ $CLIPBOARD =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    if [ -z $RHOST]; then
-      export RHOST=$CLIPBOARD
+    export RHOST=$CLIPBOARD
 
-      tmux send-keys "x" ENTER
-      tmux send-keys "export RHOST=$CLIPBOARD" ENTER
-      tmux send-keys "$0" ENTER
-    fi
+    tmux send-keys "x" ENTER
+    tmux send-keys "export RHOST=$CLIPBOARD" ENTER
+    tmux send-keys "$0" ENTER
   else
     if [ $1 = 1 ]; then
       tmux split-window -v
@@ -220,8 +218,6 @@ removeEtcHosts() {
 }
 
 runExit() {
-  removeEtcHosts
-
   exit 0
 }
 
@@ -288,7 +284,5 @@ do_menu() {
 if [ ! -z "$1" ]; then
   exportLHOST $1
 fi
-
-exportRHOST 0
 
 do_menu
