@@ -296,7 +296,7 @@ removeEtcHosts() {
 setupProxyChains() {
   openSplit
 
-  tmux send-keys "cp /etc/proxychains.conf ." ENTER
+  tmux send-keys "cp -n /etc/proxychains.conf ." ENTER
   sleep 0.1
 
   tmux send-keys "vim ./proxychains.conf" ENTER
