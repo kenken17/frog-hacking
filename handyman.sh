@@ -32,7 +32,7 @@ COMMAND_7="Setup proxychains config"
 
 COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -Pn -sV -sC | tee -i nmap-scan.txt | highlight "^\d+\/tcp"'
 COMMAND_e2='nmap -Pn -sV -oN nmap-vuln.txt --script vuln $RHOST | highlight "CVE-\d*-\d*"'
-COMMAND_e3='ffuf -v -c -recursion -t 64 -o ffuf.txt -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
+COMMAND_e3='ffuf -v -c -recursion -t 64 -o ffuf.json -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
 COMMAND_e4='whatweb -v $RHOST'
 COMMAND_e5='wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://$RHOST'
 
@@ -94,10 +94,10 @@ show_menus() {
   echo -e "  ${LIGHTGREEN}Enumeration${NOCOLOR}"
   echo -e "  -------------"
   echo -e "  ${YELLOW}e1${NOCOLOR}) $COMMAND_e1 (${YELLOW}e11${NOCOLOR} for output)"
-  echo -e "  ${YELLOW}e2${NOCOLOR}) $COMMAND_e2"
-  echo -e "  ${YELLOW}e3${NOCOLOR}) $COMMAND_e3"
+  echo -e "  ${YELLOW}e2${NOCOLOR}) $COMMAND_e2 (${YELLOW}e22${NOCOLOR} for output)"
+  echo -e "  ${YELLOW}e3${NOCOLOR}) $COMMAND_e3 (${YELLOW}e33${NOCOLOR} for output)"
   echo -e "  ${YELLOW}e4${NOCOLOR}) $COMMAND_e4"
-  echo -e "  ${YELLOW}e5${NOCOLOR}) $COMMAND_e5"
+  echo -e "  ${YELLOW}e5${NOCOLOR}) $COMMAND_e5 (${YELLOW}e55${NOCOLOR} for output)"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Network${NOCOLOR}"
   echo -e "  -------"
@@ -252,6 +252,7 @@ runCat () {
   case $1 in
     e1) C="cat nmap-scan.txt | highlight \"^\d+\/tcp\"";;
     e2) C="cat nmap-vuln.txt | highlight \"CVE-\d*-\d*\"";;
+    e3) C="cat ffuf.json | python -m json.tool";;
     e5) C="cat wpscan.txt | highlight \"CVE-\d*-\d*\"";;
   esac
 
@@ -325,6 +326,7 @@ read_options() {
     e2) runV $COMMAND_e2;;
     e22) runCat 'e2';;
     e3) runV $COMMAND_e3;;
+    e33) runCat 'e3';;
     e4) runV $COMMAND_e4;;
     e5) runV $COMMAND_e5;;
     e55) runCat 'e5';;
