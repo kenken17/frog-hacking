@@ -51,7 +51,7 @@ COMMAND_b3='ffuf -v -t 8 -X POST -w $W_COMMON -u http://$RHOST/login.php -d "key
 COMMAND_b4='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
 COMMAND_b5='python2 /usr/share/john/ssh2john.py id_rsa > key.hash'
 COMMAND_b6='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
-COMMAND_b7='sqlmap --dump-all --dbms=mysql --tamper=space2comment -r BURP_REQUEST_FFILE'
+COMMAND_b7='sqlmap --dump-all --tamper=space2comment --dbms=mysql -r BURP_REQUEST_FFILE'
 
 COMMAND_d1='binwalk -e file.jpg'
 COMMAND_d2='steghide extract -sf file.jpg'
