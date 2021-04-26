@@ -32,12 +32,15 @@ COMMAND_7="Remove entry from /etc/hosts"
 COMMAND_8="Setup proxychains config"
 
 COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -Pn -sV -sC | tee -i nmap-scan.txt | highlight "^\d+\/tcp"'
-COMMAND_e2='nmap -Pn -sV -oN nmap-vuln.txt --script vuln $RHOST | highlight "CVE-\d*-\d*"'
-COMMAND_e3='ffuf -v -c -recursion -t 64 -o ffuf.json -e $EXTS -w "$W_COMMON" -u http://$RHOST/FUZZ'
-COMMAND_e4='whatweb -v $RHOST'
-COMMAND_e5='wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://$RHOST'
-COMMAND_e6='~/Tools/enum4linux.pl -GUSnoi $RHOST | tee -i samba.txt | highlight "^user:\[.*\]|^.*\sMapping: OK"'
-COMMAND_e7='wfuzz -c -z file,$W_COMMON -X POST --hh 45 -u http://$RHOST/?FUZZ\=test'
+COMMAND_e2='ffuf -v -c -recursion -t 64 -o ffuf.json -e "$W_EXT_COMMON" -w "$W_DIR_2_3_MEDIUM" -u http://$RHOST/FUZZ'
+COMMAND_e3='whatweb -v $RHOST'
+COMMAND_e4='wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://$RHOST'
+COMMAND_e5='~/Tools/enum4linux.pl -GUSnoi $RHOST | tee -i samba.txt | highlight "^user:\[.*\]|^.*\sMapping: OK"'
+COMMAND_e6='wfuzz -c -z file,$W_DIR_2_3_MEDIUM -X POST --hh 45 -u http://$RHOST/?FUZZ\=test'
+
+COMMAND_v1='nmap -Pn -sV -oN nmap-vuln.txt --script vuln $RHOST | highlight "CVE-\d*-\d*"'
+COMMAND_v2='nmap $RHOST -p80 -oG - | nikto -o nikto-report.html -h -'
+COMMAND_v3='nikto -Plugin dir_traversal -h $RHOST'
 
 COMMAND_n1='nc -nlvp 4444'
 COMMAND_n2='ssh -i id_rsa $USER@$RHOST -p 22'
@@ -50,12 +53,14 @@ COMMAND_u1='scp ~/Tools/linpeas.sh $USER@$RHOST:/tmp'
 COMMAND_u2='scp ~/Tools/chisel $USER@$RHOST:/tmp'
 
 COMMAND_b1='hydra -f -I -vV -t 16 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST ssh -s PORT'
-COMMAND_b2='hydra -f -I -vV -t 16 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
-COMMAND_b3='ffuf -v -t 8 -X POST -w $W_COMMON -u http://$RHOST/login.php -d "key=FUZZ"'
-COMMAND_b4='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
-COMMAND_b5='python2 /usr/share/john/ssh2john.py id_rsa > key.hash'
-COMMAND_b6='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
-COMMAND_b7='sqlmap --dump-all --tamper=space2comment --dbms=mysql -r BURP_REQUEST_FFILE'
+COMMAND_b2='medusa -h $RHOST -u $USER -P "$W_PASSWORD" -M http -m DIR:/protected | highlight "\[SUCCESS\]"'
+COMMAND_b3='hydra -f -I -vV -t 16 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
+COMMAND_b4='ffuf -v -t 8 -X POST -w $W_DIR_2_3_MEDIUM -u http://$RHOST/login.php -d "key=FUZZ"'
+COMMAND_b5='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
+COMMAND_b6='python2 /usr/share/john/ssh2john.py id_rsa > key.hash'
+COMMAND_b7='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
+COMMAND_b8='sqlmap --dump-all --tamper=space2comment --dbms=mysql -r BURP_REQUEST_FFILE'
+COMMAND_b9='wpscan -v --passwords $W_PASSWORD --usernames $USER --url http://$RHOST'
 
 COMMAND_d1='binwalk -e file.jpg'
 COMMAND_d2='steghide extract -sf file.jpg'
@@ -65,10 +70,19 @@ COMMAND_t1='haiti HASH'
 COMMAND_t2='python ~/Tools/wordlistctl/wordlistctl.py search/list -g GROUP'
 COMMAND_t3='python ~/Tools/wordlistctl/wordlistctl.py fetch -d -b ~/Tools/wordlists -l KEYWORD'
 
+COMMAND_f1='volatility -f $MEM_FILE imageinfo | tee -i mem-info.txt | highlight "Suggested Profile\(s\) : .*"'
+COMMAND_f2='volatility -f $MEM_FILE hivelist --profile=$MEM_PROFILE | highlight "0x\S.*(SYSTEM|SAM)"'
+COMMAND_f3='volatility -f $MEM_FILE hashdump --profile=$MEM_PROFILE > key.hash'
+COMMAND_f4='volatility -f $MEM_FILE pslist --profile=$MEM_PROFILE'
+COMMAND_f5='volatility -f $MEM_FILE netscan --profile=$MEM_PROFILE'
+COMMAND_f6='volatility -f $MEM_FILE --profile=$MEM_PROFILE malfind -D /tmp'
+COMMAND_f7='volatility -f $MEM_FILE --profile=$MEM_PROFILE consoles'
+
 LINK_1="http://$RHOST"
 LINK_2="http://$RHOST/robots.txt"
-LINK_3="https://gtfobins.github.io/"
-LINK_4="https://gchq.github.io/CyberChef/"
+LINK_3="http://$RHOST/sitemap.xml"
+LINK_4="https://gtfobins.github.io/"
+LINK_5="https://gchq.github.io/CyberChef/"
 
 CLIP_1="python3 -c 'import pty;pty.spawn(\"/bin/bash\")'"
 CLIP_2="export TERM=xterm"
@@ -101,14 +115,18 @@ show_menus() {
   echo -e "  ${YELLOW}8${NOCOLOR}) $COMMAND_8"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Enumeration${NOCOLOR}"
-  echo -e "  -------------"
+  echo -e "  -----------"
   echo -e "  ${YELLOW}e1${NOCOLOR}) $COMMAND_e1 (${YELLOW}e11${NOCOLOR} for output)"
   echo -e "  ${YELLOW}e2${NOCOLOR}) $COMMAND_e2 (${YELLOW}e22${NOCOLOR} for output)"
-  echo -e "  ${YELLOW}e3${NOCOLOR}) $COMMAND_e3 (${YELLOW}e33${NOCOLOR} for output)"
-  echo -e "  ${YELLOW}e4${NOCOLOR}) $COMMAND_e4"
+  echo -e "  ${YELLOW}e3${NOCOLOR}) $COMMAND_e3"
+  echo -e "  ${YELLOW}e4${NOCOLOR}) $COMMAND_e4 (${YELLOW}e44${NOCOLOR} for output)"
   echo -e "  ${YELLOW}e5${NOCOLOR}) $COMMAND_e5 (${YELLOW}e55${NOCOLOR} for output)"
-  echo -e "  ${YELLOW}e6${NOCOLOR}) $COMMAND_e6 (${YELLOW}e66${NOCOLOR} for output)"
-  echo -e "  ${YELLOW}e7${NOCOLOR}) $COMMAND_e7"
+  echo -e ""
+  echo -e "  ${LIGHTGREEN}Vulnerablities${NOCOLOR}"
+  echo -e "  --------------"
+  echo -e "  ${YELLOW}v1${NOCOLOR}) $COMMAND_v1 (${YELLOW}v11${NOCOLOR} for output)"
+  echo -e "  ${YELLOW}v2${NOCOLOR}) $COMMAND_v2 (${YELLOW}v22${NOCOLOR} for output)"
+  echo -e "  ${YELLOW}v3${NOCOLOR}) $COMMAND_v3"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Network${NOCOLOR}"
   echo -e "  -------"
@@ -133,6 +151,8 @@ show_menus() {
   echo -e "  ${YELLOW}b5${NOCOLOR}) $COMMAND_b5"
   echo -e "  ${YELLOW}b6${NOCOLOR}) $COMMAND_b6"
   echo -e "  ${YELLOW}b7${NOCOLOR}) $COMMAND_b7"
+  echo -e "  ${YELLOW}b8${NOCOLOR}) $COMMAND_b8"
+  echo -e "  ${YELLOW}b9${NOCOLOR}) $COMMAND_b9"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Decoding/Extracting${NOCOLOR}"
   echo -e "  --------------------"
@@ -152,6 +172,21 @@ show_menus() {
   echo -e "  ${YELLOW}l2${NOCOLOR}) $LINK_2"
   echo -e "  ${YELLOW}l3${NOCOLOR}) $LINK_3"
   echo -e "  ${YELLOW}l4${NOCOLOR}) $LINK_4"
+  echo -e "  ${YELLOW}l5${NOCOLOR}) $LINK_5"
+  echo -e ""
+  echo -e "  ${LIGHTGREEN}OSINT${NOCOLOR}"
+  echo -e "  -----"
+  echo -e "  ${YELLOW}s1${NOCOLOR}) $COMMAND_s1"
+  echo -e ""
+  echo -e "  ${LIGHTGREEN}FORENSIC${NOCOLOR}"
+  echo -e "  -----__"
+  echo -e "  ${YELLOW}f1${NOCOLOR}) $COMMAND_f1 (${YELLOW}f11${NOCOLOR} for output)"
+  echo -e "  ${YELLOW}f2${NOCOLOR}) $COMMAND_f2"
+  echo -e "  ${YELLOW}f3${NOCOLOR}) $COMMAND_f3"
+  echo -e "  ${YELLOW}f4${NOCOLOR}) $COMMAND_f4"
+  echo -e "  ${YELLOW}f5${NOCOLOR}) $COMMAND_f5"
+  echo -e "  ${YELLOW}f6${NOCOLOR}) $COMMAND_f6"
+  echo -e "  ${YELLOW}f7${NOCOLOR}) $COMMAND_f7"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Clipboard${NOCOLOR}"
   echo -e "  ---------"
@@ -177,6 +212,8 @@ setTmuxEnv () {
   tmux setenv RPORT $RPORT
   tmux setenv USER $USER
   tmux setenv CTF_HOST $CTF_HOST
+  tmux setenv MEM_FILE $MEM_FILE
+  tmux setenv MEM_PROFILE $MEM_PROFILE
 }
 
 openSplit() {
@@ -270,10 +307,13 @@ runCat () {
 
   case $1 in
     e1) C="cat nmap-scan.txt | highlight \"^\d+\/tcp\"";;
-    e2) C="cat nmap-vuln.txt | highlight \"CVE-\d*-\d*\"";;
-    e3) C="cat ffuf.json | python -m json.tool";;
-    e5) C="cat wpscan.txt | highlight \"CVE-\d*-\d*\"";;
-    e6) C="cat samba.txt | highlight \"^user:\[.*\]|^.*\sMapping: OK\"";;
+    e2) C="cat ffuf.json | python -m json.tool";;
+    e4) C="cat wpscan.txt | highlight \"CVE-\d*-\d*\"";;
+    e5) C="cat samba.txt | highlight \"^user:\[.*\]|^.*\sMapping: OK\"";;
+
+    v2) C="cat nmap-vuln.txt | highlight \"CVE-\d*-\d*\"";;
+
+    f1) C="cat mem-info.txt | highlight \"Suggested Profile\(s\) : .*\"";;
   esac
 
   tmux send-keys "$C" Enter
@@ -347,13 +387,15 @@ read_options() {
     e2) runV $COMMAND_e2;;
     e22) runCat 'e2';;
     e3) runV $COMMAND_e3;;
-    e33) runCat 'e3';;
     e4) runV $COMMAND_e4;;
+    e44) runCat 'e4';;
     e5) runV $COMMAND_e5;;
     e55) runCat 'e5';;
-    e6) runV $COMMAND_e6;;
-    e66) runCat 'e6';;
-    e7) runV $COMMAND_e7;;
+
+    v1) runV $COMMAND_v1;;
+    v11) runCat 'v1';;
+    v2) runV $COMMAND_v2;;
+    v22) openLink 'nikto-report.html';;
 
     n1) runV $COMMAND_n1;;
     n2) runV $COMMAND_n2;;
@@ -372,6 +414,8 @@ read_options() {
     b5) runV $COMMAND_b5;;
     b6) runV $COMMAND_b6;;
     b7) runV $COMMAND_b7;;
+    b8) runV $COMMAND_b8;;
+    b9) runV $COMMAND_b9;;
 
     d1) runV $COMMAND_d1;;
     d2) runV $COMMAND_d2;;
@@ -385,6 +429,17 @@ read_options() {
     l2) openLink $LINK_2;;
     l3) openLink $LINK_3;;
     l4) openLink $LINK_4;;
+
+    f1) runV $COMMAND_f1;;
+    f11) runCat 'f1';;
+    f2) runV $COMMAND_f2;;
+    f3) runV $COMMAND_f3;;
+    f4) runV $COMMAND_f4;;
+    f5) runV $COMMAND_f5;;
+    f6) runV $COMMAND_f6;;
+    f7) runV $COMMAND_f7;;
+
+    s1) runV $COMMAND_s1;;
 
     c1) runC $CLIP_1;;
     c2) runC $CLIP_2;;
