@@ -42,8 +42,8 @@ COMMAND_v1='nmap -Pn -sV -oN nmap-vuln.txt --script vuln $RHOST | highlight "CVE
 COMMAND_v2='nmap $RHOST -p80 -oG - | nikto -o nikto-report.html -h -'
 COMMAND_v3='nikto -Plugin dir_traversal -h $RHOST'
 
-COMMAND_n1='nc -nlvp 4444'
-COMMAND_n2='ssh -i id_rsa $USER@$RHOST -p 22'
+COMMAND_n1='ssh -i id_rsa $USER@$RHOST -p 22'
+COMMAND_n2='nc -nlvp 4444'
 COMMAND_n3='ssh -i id_rsa $USER@$RHOST -L $RPORT:172.16.0.0:$LPORT -N -f'
 COMMAND_n4='ssh -i id_rsa $USER@$RHOST -D 9050 -N -f'
 COMMAND_n5='chisel server -p 9999 --reverse -v'
@@ -58,9 +58,10 @@ COMMAND_b3='hydra -f -I -vV -t 16 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80
 COMMAND_b4='ffuf -v -t 8 -X POST -w $W_DIR_2_3_MEDIUM -u http://$RHOST/login.php -d "key=FUZZ"'
 COMMAND_b5='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
 COMMAND_b6='python2 /usr/share/john/ssh2john.py id_rsa > key.hash'
-COMMAND_b7='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
-COMMAND_b8='sqlmap --dump-all --tamper=space2comment --dbms=mysql -r BURP_REQUEST_FFILE'
-COMMAND_b9='wpscan -v --passwords $W_PASSWORD --usernames $USER --url http://$RHOST'
+COMMAND_b7='unshadow passwd shadow > key.hash'
+COMMAND_b8='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
+COMMAND_b9='sqlmap --dump-all --tamper=space2comment --dbms=mysql -r BURP_REQUEST_FFILE'
+COMMAND_ba='wpscan -v --passwords $W_PASSWORD --usernames $USER --url http://$RHOST'
 
 COMMAND_d1='binwalk -e file.jpg'
 COMMAND_d2='steghide extract -sf file.jpg'
@@ -153,6 +154,7 @@ show_menus() {
   echo -e "  ${YELLOW}b7${NOCOLOR}) $COMMAND_b7"
   echo -e "  ${YELLOW}b8${NOCOLOR}) $COMMAND_b8"
   echo -e "  ${YELLOW}b9${NOCOLOR}) $COMMAND_b9"
+  echo -e "  ${YELLOW}ba${NOCOLOR}) $COMMAND_ba"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Decoding/Extracting${NOCOLOR}"
   echo -e "  --------------------"
