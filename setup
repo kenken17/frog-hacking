@@ -1,6 +1,11 @@
 # Create the bin path, .profile should add the dir to the PATH
 mkdir -p ~/bin
 
+# set PATH so it includes user's private bin if it exists, put in something like .bash_profile since it is not being loaed by tmux session
+if [ -d "$HOME/bin" ] ; then
+  pathadd "$HOME/bin"
+fi
+
 # Source the alias for handyman
 source ~/Hacking/frog-hacking/.alias
 
@@ -18,7 +23,7 @@ Download from: https://go.dev/doc/install
 sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf ~/Downloads/go1.18.1.linux-amd64.tar.gz
 
 # Path for go
-export PATH=$PATH:~/go/bin
+pathadd "$HOME/go/bin"
 
 # Install cargo for rust (follow onscreen instruction), mainly for rustscan
 curl https://sh.rustup.rs -sSf | sh
@@ -28,3 +33,6 @@ cargo install rustscan
 
 # Install gobuster
 go install github.com/OJ/gobuster/v3@latest
+
+# Install ffuf
+go install github.com/ffuf/ffuf@latest
