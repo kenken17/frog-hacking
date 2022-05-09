@@ -344,7 +344,7 @@ addEtcHosts() {
 
       sudo bash -c "echo '$RHOST $CTF_HOST' >> /etc/hosts"
 
-      xdg-open "http://$CTF_HOST"
+      openLink "http://$CTF_HOST"
     else
       openSplit
 
@@ -355,7 +355,7 @@ addEtcHosts() {
 
     sudo bash -c "echo '$RHOST $CTF_HOST' >> /etc/hosts"
 
-    xdg-open "http://$CTF_HOST"
+    openLink "http://$CTF_HOST"
   fi
 }
 
