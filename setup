@@ -1,0 +1,30 @@
+# Create the bin path, .profile should add the dir to the PATH
+mkdir -p ~/bin
+
+# Source the alias for handyman
+source ~/Hacking/frog-hacking/.alias
+
+# Link the handyman tool
+ln -s ~/Hacking/frog-hacking/handyman.sh ~/bin/handyman
+
+# vpn alias
+alias thm_vpn='sudo openvpn --config ~/Hacking/tryhackme/kenken17.ovpn'
+
+# Download all tools
+sudo apt install xclip nmap
+
+# Stup Go
+Download from: https://go.dev/doc/install
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf ~/Downloads/go1.18.1.linux-amd64.tar.gz
+
+# Path for go
+export PATH=$PATH:~/go/bin
+
+# Install cargo for rust (follow onscreen instruction), mainly for rustscan
+curl https://sh.rustup.rs -sSf | sh
+
+# install rustscan
+cargo install rustscan
+
+# Install gobuster
+go install github.com/OJ/gobuster/v3@latest
