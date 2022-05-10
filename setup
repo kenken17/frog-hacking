@@ -7,7 +7,7 @@ if [ -d "$HOME/bin" ] ; then
 fi
 
 # Source the alias for handyman
-source ~/Hacking/frog-hacking/.alias
+source ~/Hacking/frog-hacking/.all-alias
 
 # Link the handyman tool
 ln -s ~/Hacking/frog-hacking/handyman.sh ~/bin/handyman
@@ -36,3 +36,27 @@ go install github.com/OJ/gobuster/v3@latest
 
 # Install ffuf
 go install github.com/ffuf/ffuf@latest
+
+# Install wpscan
+sudo apt update
+sudo apt install -y ruby-full
+sudo gem install wpscan
+wpscan --update
+
+# Put in api token, get from lastpass
+touch ~/.wpscan/scan.yml
+
+# As below
+# cli_options:
+#  api_token: YOUR_API_TOKEN
+
+# or put in env WPSCAN_API_TOKEN
+
+# SecLists
+cd ~/Hacking/Tools
+wget -c https://github.com/danielmiessler/SecLists/archive/master.zip -O SecList.zip \
+  && unzip SecList.zip \
+  && rm -f SecList.zip
+
+
+

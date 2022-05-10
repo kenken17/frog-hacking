@@ -35,7 +35,7 @@ COMMAND_e1="rustscan --accessible --ulimit 5000 -a ${RHOST} -- -Pn -sV -sC | tee
 COMMAND_e1map="nmap -Pn -p- ${RHOST}"
 COMMAND_e2="ffuf -c -fs 0 -recursion -t 64 -o ffuf.json -e $``W_EXT_COMMON -w $``W_DIR_2_3_MEDIUM -u http://${RHOST}/FUZZ"
 COMMAND_e3="whatweb -v ${RHOST}"
-COMMAND_e4="wpscan --api-token G8ifDn8HmQOCnzEB9Z7i9NkJDX9cGvfmPPbOdxTXNFk -v -o wpscan.txt --url http://${RHOST}"
+COMMAND_e4="wpscan -v -o wpscan.txt --url http://${RHOST}"
 COMMAND_e5="~/Tools/enum4linux.pl -GUSnoi ${RHOST} | tee -i samba.txt | highlight \"^user:\[.*\]|^.*\sMapping: OK\""
 COMMAND_e6="wfuzz -c -z file,$``W_DIR_2_3_MEDIUM -X POST --hh 45 -u http://${RHOST}/?FUZZ\=test"
 COMMAND_e7="ffuf -c -fs 0 -t 64 -o fuff-dns.json -u http://${RHOST} -w $``W_DNS_COMMON -H \"Host: FUZZ.${RHOST}.com\""
