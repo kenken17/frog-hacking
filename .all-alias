@@ -1,10 +1,26 @@
-export W_ROCK=~/Hacking/Tools/SecLists/Passwords/Leaked-Databases/rockyou.txt                                                                                                                                                                                                                  
-export W_USERNAME=~/Hacking/Tools/SecLists/Usernames/Names/names.txt
-export W_PASSWORD=~/Hacking/Tools/SecLists/Passwords/Leaked-Databases/rockyou.txt
-# export W_COMMON=/usr/share/wordlists/dirb/common.txt
-# export W_BIG=/usr/share/wordlists/dirb/big.txt
-# export W_EXT_COMMON=/usr/share/wordlists/dirb/extensions_common.txt
-export W_DNS_COMMON=~/Hacking/Tools/SecLists/Discovery/DNS/subdomains-top1million-5000.txt
-# export W_DIR_2_3_MEDIUM=/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
-export W_USER_AGENT=~/Hacking/Tools/SecLists/Fuzzing/User-Agents/user-agents-whatismybrowserdotcom-large.txt
+# Common
+export W_COMMON=~/Hacking/Tools/SecLists-master/Discovery/Web-Content/common.txt
+export W_BIG=~/Hacking/Tools/SecLists-master/Discovery/Web-Content/big.txt
+
+# Password
+export W_ROCK=~/Hacking/Tools/SecLists-master/Passwords/Leaked-Databases/rockyou.txt                                                                                                                                                                                                                  
+export W_PASSWORD=~/Hacking/Tools/SecLists-master/Passwords/Leaked-Databases/rockyou.txt
+
+# Username
+export W_USERNAME=~/Hacking/Tools/SecLists-master/Usernames/Names/names.txt
+
+# Directories
+export W_DIR_2_3_MEDIUM=~/Hacking/Tools/SecLists-master/Discovery/Web-Content/directory-list-2.3-medium.txt
+
+# Extensions
+export W_EXT_COMMON=~/Hacking/Tools/SecLists-master/Fuzzing/extensions-most-common.fuzz.txt
+
+# DNS
+export W_DNS_COMMON=~/Hacking/Tools/SecLists-master/Discovery/DNS/subdomains-top1million-5000.txt
+
+# User agents
+export W_USER_AGENT=~/Hacking/Tools/SecLists-master/Fuzzing/User-Agents/user-agents-whatismybrowserdotcom-large.txt
+
+# MISC
+export W_NAUGHTY=~/Hacking/Tools/SecLists-master/Fuzzing/big-list-of-naughty-strings.txt
 
