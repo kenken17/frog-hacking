@@ -10,10 +10,10 @@ fi
 source ~/Hacking/frog-hacking/.all-alias
 
 # Link the handyman tool
-ln -s ~/Hacking/frog-hacking/handyman.sh ~/bin/handyman
+ln -fs ~/Hacking/frog-hacking/handyman.sh ~/bin/handyman
 
 # vpn alias
-alias thm_vpn='sudo openvpn --config ~/Hacking/tryhackme/kenken17.ovpn'
+alias vpn_thm='sudo openvpn --config ~/Hacking/tryhackme/kenken17.ovpn'
 
 # Download all tools
 sudo apt install xclip nmap
@@ -59,25 +59,16 @@ wget -c https://github.com/danielmiessler/SecLists/archive/master.zip -O SecList
   && rm -f SecList.zip
 
 # Extract rockyou
+cd ~/Hacking/Tools/SecLists-master/Passwords/Leaked-Databases
 tar -xf rockyou.txt.tar.gz
 
 # Get payload 
+cd ~/Hacking/Tools
 git clone https://github.com/swisskyrepo/PayloadsAllTheThings.git
 
 # Download metasploit
 curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall && \
   chmod 755 msfinstall && \
   ./msfinstall
-
-
-
-
-
-
-
-
-
-
-
 
 

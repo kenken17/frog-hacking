@@ -1,3 +1,5 @@
+highlight() { perl -pe "s/$1/${RED}$&${NOCOLOR}/g"; }
+
 # Common
 export W_COMMON=~/Hacking/Tools/SecLists-master/Discovery/Web-Content/common.txt
 export W_BIG=~/Hacking/Tools/SecLists-master/Discovery/Web-Content/big.txt
